@@ -40,11 +40,11 @@ export async function GET(request: NextRequest) {
     let synced = 0
 
     for (const item of items) {
-      const title = String(item.title || item.name || "")
-      const description = String(item.description || "")
-      const url = String(item.url || item.jobUrl || "")
-      const externalId = String(item.externalId || item.jobId || item.id || url)
-      const budgetRaw = item.budget || item.price || item.rate
+      const title = String(item.title || item.name || item.jobTitle || "")
+      const description = String(item.description || item.body || item.text || "")
+      const url = String(item.url || item.jobUrl || item.link || "")
+      const externalId = String(item.externalId || item.jobId || item.id || item._id || url)
+      const budgetRaw = item.budget || item.price || item.rate || item.salary
       let budgetMin: number | null = null
       let budgetMax: number | null = null
       if (typeof budgetRaw === "string") {

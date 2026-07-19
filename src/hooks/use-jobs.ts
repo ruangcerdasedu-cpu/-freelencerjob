@@ -194,6 +194,37 @@ export function useGenerateDraft() {
   })
 }
 
+export function useManualJob() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async (data: {
+      title: string
+      description: string
+      url?: string
+      budget_min?: number
+      budget_max?: number
+      currency?: string
+      skills?: string
+      client_country?: string
+    }) => {
+      const response = await fetch("/api/jobs/manual", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      })
+      if (!response.ok) {
+        const err = await response.json()
+        throw new Error(err.error || "Failed to add job")
+      }
+      return response.json()
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["jobs"] })
+    },
+  })
+}
+
 export function useTriggerScrape() {
   return useMutation({
     mutationFn: async () => {

@@ -2,17 +2,23 @@
 
 import { useState } from "react"
 import { useTranslations } from "next-intl"
-import { useJobs, useSaveJob, useAnalyzeJob, useTriggerScrape } from "@/hooks/use-jobs"
+import { useJobs, useSaveJob, useAnalyzeJob, useTriggerScrape, useManualJob } from "@/hooks/use-jobs"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
 import { JobCardSkeleton } from "@/components/ui/skeleton"
 import { EmptyState } from "@/components/ui/empty-state"
 import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
+  DialogTrigger,
+} from "@/components/ui/dialog"
+import { Label } from "@/components/ui/label"
+import {
   Search, Brain, Bookmark, RefreshCw,
   DollarSign, Clock, LayoutGrid, List, Filter,
-  ArrowUpDown
+  ArrowUpDown, Plus
 } from "lucide-react"
 import Link from "next/link"
 import { toast } from "sonner"
@@ -37,10 +43,13 @@ export default function JobsPage() {
   const [view, setView] = useState<"list" | "grid">("list")
   const [showFilters, setShowFilters] = useState(false)
   const [filter, setFilter] = useState<{ platform?: string; risk?: string }>({})
+  const [dialogOpen, setDialogOpen] = useState(false)
+  const [form, setForm] = useState({ title: "", description: "", url: "", budget_min: "", budget_max: "", currency: "USD", skills: "", client_country: "" })
   const { data: jobs, isLoading, error } = useJobs({ search: search || undefined, ...filter })
   const saveJob = useSaveJob()
   const analyzeJob = useAnalyzeJob()
   const triggerScrape = useTriggerScrape()
+  const manualJob = useManualJob()
 
   const handleSave = async (jobId: string, e: React.MouseEvent) => {
     e.preventDefault()
@@ -59,6 +68,30 @@ export default function JobsPage() {
   const handleScrape = async () => {
     await triggerScrape.mutateAsync()
     toast.success(t("scrapeToast"))
+  }
+
+  const handleAddJob = async () => {
+    if (!form.title.trim()) {
+      toast.error(t("jobTitleRequired"))
+      return
+    }
+    if (!form.description.trim()) {
+      toast.error(t("jobDescRequired"))
+      return
+    }
+    await manualJob.mutateAsync({
+      title: form.title,
+      description: form.description,
+      url: form.url || undefined,
+      budget_min: form.budget_min ? Number(form.budget_min) : undefined,
+      budget_max: form.budget_max ? Number(form.budget_max) : undefined,
+      currency: form.currency,
+      skills: form.skills || undefined,
+      client_country: form.client_country || undefined,
+    })
+    toast.success(t("addSuccess"))
+    setDialogOpen(false)
+    setForm({ title: "", description: "", url: "", budget_min: "", budget_max: "", currency: "USD", skills: "", client_country: "" })
   }
 
   const scoreColor = (score: number | null) => {
@@ -88,6 +121,63 @@ export default function JobsPage() {
           <p className="text-muted-foreground">{t("subtitle")}</p>
         </div>
         <div className="flex gap-2">
+          <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+            <DialogTrigger asChild>
+              <Button variant="outline" size="sm">
+                <Plus className="mr-2 h-4 w-4" />
+                {t("addJob")}
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[500px]">
+              <DialogHeader>
+                <DialogTitle>{t("addJobTitle")}</DialogTitle>
+                <DialogDescription>{t("addJobDesc")}</DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4 py-2">
+                <div className="space-y-2">
+                  <Label>{t("jobTitleLabel")}</Label>
+                  <Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
+                </div>
+                <div className="space-y-2">
+                  <Label>{t("jobDescLabel")}</Label>
+                  <Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} className="min-h-[100px]" />
+                </div>
+                <div className="space-y-2">
+                  <Label>{t("jobUrlLabel")}</Label>
+                  <Input value={form.url} onChange={(e) => setForm({ ...form, url: e.target.value })} />
+                </div>
+                <div className="grid grid-cols-3 gap-3">
+                  <div className="space-y-2">
+                    <Label>{t("budgetMin")}</Label>
+                    <Input type="number" value={form.budget_min} onChange={(e) => setForm({ ...form, budget_min: e.target.value })} />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>{t("budgetMax")}</Label>
+                    <Input type="number" value={form.budget_max} onChange={(e) => setForm({ ...form, budget_max: e.target.value })} />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>{t("currencyLabel")}</Label>
+                    <select className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm" value={form.currency} onChange={(e) => setForm({ ...form, currency: e.target.value })}>
+                      <option value="USD">USD</option>
+                      <option value="IDR">IDR</option>
+                      <option value="EUR">EUR</option>
+                    </select>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label>{t("skillsLabel")}</Label>
+                  <Input value={form.skills} onChange={(e) => setForm({ ...form, skills: e.target.value })} />
+                </div>
+                <div className="space-y-2">
+                  <Label>{t("clientCountryLabel")}</Label>
+                  <Input value={form.client_country} onChange={(e) => setForm({ ...form, client_country: e.target.value })} />
+                </div>
+                <Button className="w-full" onClick={handleAddJob} disabled={manualJob.isPending}>
+                  {manualJob.isPending ? t("scraping") : t("addJob")}
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
           <Button variant="outline" size="sm" onClick={handleScrape} disabled={triggerScrape.isPending}>
             <RefreshCw className={`mr-2 h-4 w-4 ${triggerScrape.isPending ? "animate-spin" : ""}`} />
             {triggerScrape.isPending ? t("scraping") : t("scrapeNow")}
@@ -157,6 +247,7 @@ export default function JobsPage() {
               <option value="upwork">Upwork</option>
               <option value="freelancer">Freelancer</option>
               <option value="fiverr">Fiverr</option>
+              <option value="manual">{t("addJob")}</option>
             </select>
           </div>
           <div className="space-y-1">

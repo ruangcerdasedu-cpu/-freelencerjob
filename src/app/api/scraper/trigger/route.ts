@@ -1,5 +1,24 @@
 import { NextResponse } from "next/server"
 
+const ACTORS: { actorId: string; name: string; input: Record<string, unknown> }[] = [
+  {
+    actorId: "drobnikj/jobs-scraper",
+    name: "upwork",
+    input: {
+      keywords: "web development content writing data entry",
+      maxItems: 10,
+    },
+  },
+  {
+    actorId: "drobnikj/jobs-scraper",
+    name: "freelancer",
+    input: {
+      keywords: "web development content writing data entry",
+      maxItems: 10,
+    },
+  },
+]
+
 export async function POST() {
   const apifyToken = process.env.APIFY_TOKEN
 
@@ -7,28 +26,9 @@ export async function POST() {
     return NextResponse.json({ error: "APIFY_TOKEN not configured" }, { status: 500 })
   }
 
-  const platforms = [
-    {
-      actorId: "neatrat/upwork-job-scraper",
-      name: "upwork",
-      input: {
-        searchKeyword: "web development content writing data entry",
-        maxLimit: 10,
-      },
-    },
-    {
-      actorId: "neatrat/upwork-job-scraper",
-      name: "freelancer",
-      input: {
-        searchKeyword: "web development content writing data entry",
-        maxLimit: 10,
-      },
-    },
-  ]
-
   const runs = []
 
-  for (const platform of platforms) {
+  for (const platform of ACTORS) {
     try {
       const actorUrlName = platform.actorId.replace("/", "~")
       const response = await fetch(
