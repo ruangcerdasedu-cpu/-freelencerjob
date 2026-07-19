@@ -233,7 +233,17 @@
     "validation": "Please enter a job description",
     "totalHours": "~{hours}h total",
     "technicalGuide": "Technical Guide:",
-    "successToast": "Tasks generated!"
+    "successToast": "Tasks generated!",
+    "feasible": "feasible with AI",
+    "aiTools": "Recommended AI Tools",
+    "aiToolsForTask": "AI Tools for this task:",
+    "projectProgress": "Project progress",
+    "winStrategy": "How to Win This Project",
+    "deliverable": "Deliverable",
+    "finalDeliverable": "Final Deliverable",
+    "assigneeAi": "AI",
+    "assigneeHuman": "You",
+    "assigneeBoth": "AI + You"
   },
   "communicate": {
     "title": "Communication Assistant",

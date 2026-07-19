@@ -233,7 +233,17 @@
     "validation": "Harap masukkan deskripsi pekerjaan",
     "totalHours": "~{hours}j total",
     "technicalGuide": "Panduan Teknis:",
-    "successToast": "Tugas berhasil dibuat!"
+    "successToast": "Tugas berhasil dibuat!",
+    "feasible": "layak dengan AI",
+    "aiTools": "Rekomendasi Tools AI",
+    "aiToolsForTask": "Tools AI untuk tugas ini:",
+    "projectProgress": "Progres proyek",
+    "winStrategy": "Cara Menang Proyek Ini",
+    "deliverable": "Hasil",
+    "finalDeliverable": "Hasil Akhir",
+    "assigneeAi": "AI",
+    "assigneeHuman": "Kamu",
+    "assigneeBoth": "AI + Kamu"
   },
   "communicate": {
     "title": "Asisten Komunikasi",

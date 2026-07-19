@@ -10,22 +10,66 @@ import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
+import { Progress } from "@/components/ui/progress"
+import { Separator } from "@/components/ui/separator"
 import { toast } from "sonner"
-import { Bot, Loader2, Clock } from "lucide-react"
+import { Bot, Loader2, Clock, Sparkles, Target, Trophy, ExternalLink, User, Cpu } from "lucide-react"
+
+interface AiTool {
+  name: string
+  how_to_use: string
+}
 
 interface Task {
   order: number
   title: string
   description: string
-  technical_guide: string
+  assignee: "ai" | "human" | "both"
+  completion_percentage: number
   estimated_hours: number
+  technical_guide: string
+  deliverable: string
+  ai_tools: AiTool[]
+}
+
+interface ToolRecommendation {
+  name: string
+  use_case: string
+  url: string
+}
+
+interface CompetitiveAdvantage {
+  point: string
+  action: string
 }
 
 interface MentorResult {
-  tasks: Task[]
-  total_estimated_hours: number
+  project_summary: string
   difficulty: string
-  tools_needed: string[]
+  total_completion_percentage: number
+  estimated_duration: string
+  tools_recommended: ToolRecommendation[]
+  tasks: Task[]
+  competitive_advantages: CompetitiveAdvantage[]
+  final_deliverable: string
+}
+
+function assigneeIcon(assignee: string) {
+  if (assignee === "ai") return <Cpu className="h-3 w-3" />
+  if (assignee === "both") return <Sparkles className="h-3 w-3" />
+  return <User className="h-3 w-3" />
+}
+
+function assigneeColor(assignee: string) {
+  if (assignee === "ai") return "bg-purple-500/10 text-purple-600 dark:text-purple-400"
+  if (assignee === "both") return "bg-amber-500/10 text-amber-600 dark:text-amber-400"
+  return "bg-blue-500/10 text-blue-600 dark:text-blue-400"
+}
+
+function assigneeLabel(assignee: string, t: (key: string) => string) {
+  if (assignee === "ai") return t("assigneeAi")
+  if (assignee === "both") return t("assigneeBoth")
+  return t("assigneeHuman")
 }
 
 function MentorContent() {
@@ -107,48 +151,164 @@ function MentorContent() {
 
       {result && (
         <>
-          <div className="flex gap-3">
-            <Badge variant={difficultyColor(result.difficulty)}>
-              {result.difficulty}
-            </Badge>
-            <Badge variant="secondary">
-              <Clock className="h-3 w-3 mr-1" />
-              {t("totalHours", { hours: result.total_estimated_hours })}
-            </Badge>
-            {result.tools_needed?.map((tool) => (
-              <Badge key={tool} variant="outline">{tool}</Badge>
-            ))}
-          </div>
+          {/* Summary Banner */}
+          <Card className="border-primary/20 bg-primary/5">
+            <CardContent className="p-6 space-y-4">
+              <p className="text-sm leading-relaxed">{result.project_summary}</p>
+              <div className="flex flex-wrap gap-2">
+                <Badge variant={difficultyColor(result.difficulty)}>
+                  {t("difficulty")}: {result.difficulty}
+                </Badge>
+                <Badge variant="secondary">
+                  <Clock className="h-3 w-3 mr-1" />
+                  {result.estimated_duration}
+                </Badge>
+                <Badge variant="secondary">
+                  <Target className="h-3 w-3 mr-1" />
+                  {result.total_completion_percentage}% {t("feasible")}
+                </Badge>
+              </div>
+            </CardContent>
+          </Card>
 
-          <div className="space-y-4">
-            {result.tasks.map((task) => (
+          {/* AI Tools Recommendation */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-base">
+                <Sparkles className="h-4 w-4 text-primary" />
+                {t("aiTools")}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-3 sm:grid-cols-2">
+                {result.tools_recommended?.map((tool) => (
+                  <a
+                    key={tool.name}
+                    href={tool.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-start gap-3 rounded-lg border p-3 hover:bg-accent transition-colors group"
+                  >
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-sm font-medium">{tool.name}</span>
+                        <ExternalLink className="h-3 w-3 text-muted-foreground group-hover:text-primary transition-colors" />
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-0.5">{tool.use_case}</p>
+                    </div>
+                  </a>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Tasks Breakdown */}
+          <div className="space-y-3">
+            <h3 className="text-lg font-semibold flex items-center gap-2">
+              <Bot className="h-4 w-4" />
+              {t("taskBreakdown")}
+            </h3>
+            {result.tasks?.map((task) => (
               <Card key={task.order}>
-                <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 text-xs font-medium">
+                <CardHeader className="pb-3">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-medium">
                         {task.order}
                       </span>
-                      <CardTitle className="text-base">{task.title}</CardTitle>
+                      <CardTitle className="text-base truncate">{task.title}</CardTitle>
                     </div>
-                    <Badge variant="secondary" className="text-xs">
-                      <Clock className="h-3 w-3 mr-1" />
-                      {t("totalHours", { hours: task.estimated_hours })}
-                    </Badge>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <Badge variant="secondary" className={assigneeColor(task.assignee)}>
+                        {assigneeIcon(task.assignee)}
+                        <span className="ml-1">{assigneeLabel(task.assignee, t)}</span>
+                      </Badge>
+                      <Badge variant="secondary" className="text-xs whitespace-nowrap">
+                        <Clock className="h-3 w-3 mr-1" />
+                        ~{task.estimated_hours}h
+                      </Badge>
+                    </div>
+                  </div>
+                  {/* Progress bar for completion % */}
+                  <div className="mt-3">
+                    <div className="flex items-center justify-between text-xs text-muted-foreground mb-1">
+                      <span>{t("projectProgress")}</span>
+                      <span>{task.completion_percentage}%</span>
+                    </div>
+                    <Progress value={task.completion_percentage} className="h-1.5" />
                   </div>
                 </CardHeader>
-                <CardContent className="space-y-3">
+                <CardContent className="space-y-3 pt-0">
                   <p className="text-sm text-muted-foreground">{task.description}</p>
+
+                  {task.ai_tools?.length > 0 && (
+                    <div className="rounded-lg border border-purple-200 dark:border-purple-900 bg-purple-50/50 dark:bg-purple-950/30 p-3 space-y-2">
+                      <p className="text-xs font-semibold flex items-center gap-1.5 text-purple-700 dark:text-purple-300">
+                        <Sparkles className="h-3 w-3" />
+                        {t("aiToolsForTask")}
+                      </p>
+                      {task.ai_tools.map((aiTool) => (
+                        <div key={aiTool.name} className="text-sm">
+                          <span className="font-medium text-foreground">{aiTool.name}:</span>{" "}
+                          <span className="text-muted-foreground">{aiTool.how_to_use}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
                   {task.technical_guide && (
                     <div className="rounded-lg bg-muted p-3">
                       <p className="text-xs font-medium mb-1">{t("technicalGuide")}</p>
-                      <p className="text-sm whitespace-pre-wrap">{task.technical_guide}</p>
+                      <p className="text-sm whitespace-pre-wrap text-muted-foreground">{task.technical_guide}</p>
+                    </div>
+                  )}
+
+                  {task.deliverable && (
+                    <div className="flex items-start gap-2 text-sm">
+                      <Trophy className="h-4 w-4 text-amber-500 mt-0.5 shrink-0" />
+                      <div>
+                        <span className="font-medium">{t("deliverable")}:</span>{" "}
+                        <span className="text-muted-foreground">{task.deliverable}</span>
+                      </div>
                     </div>
                   )}
                 </CardContent>
               </Card>
             ))}
           </div>
+
+          {/* Final Deliverable */}
+          <Card className="border-emerald-200 dark:border-emerald-900 bg-emerald-50/50 dark:bg-emerald-950/30">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-base">
+                <Trophy className="h-4 w-4 text-emerald-600" />
+                {t("finalDeliverable")}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground">{result.final_deliverable}</p>
+            </CardContent>
+          </Card>
+
+          {/* Competitive Advantages */}
+          {result.competitive_advantages?.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-base">
+                  <Target className="h-4 w-4 text-primary" />
+                  {t("winStrategy")}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {result.competitive_advantages.map((adv, i) => (
+                  <div key={i} className="space-y-1">
+                    <p className="text-sm font-medium">{adv.point}</p>
+                    <p className="text-sm text-muted-foreground pl-4 border-l-2 border-primary/30">{adv.action}</p>
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+          )}
         </>
       )}
     </div>
