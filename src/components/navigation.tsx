@@ -2,6 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
+import { useTranslations } from "next-intl"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import {
@@ -17,18 +18,20 @@ import {
 import { useState } from "react"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { UserMenu } from "@/components/user-menu"
-
-const navItems = [
-  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/jobs", label: "Jobs", icon: Briefcase },
-  { href: "/saved", label: "Saved", icon: Bookmark },
-  { href: "/mentor", label: "Mentor", icon: Bot },
-  { href: "/communicate", label: "Communicate", icon: MessageSquare },
-  { href: "/settings", label: "Settings", icon: Settings },
-]
+import { LanguageSwitcher } from "@/components/language-switcher"
 
 function NavLinks({ className, onNavigate }: { className?: string; onNavigate?: () => void }) {
   const pathname = usePathname()
+  const t = useTranslations("nav")
+
+  const navItems = [
+    { href: "/dashboard", label: t("dashboard"), icon: LayoutDashboard },
+    { href: "/jobs", label: t("jobs"), icon: Briefcase },
+    { href: "/saved", label: t("saved"), icon: Bookmark },
+    { href: "/mentor", label: t("mentor"), icon: Bot },
+    { href: "/communicate", label: t("communicate"), icon: MessageSquare },
+    { href: "/settings", label: t("settings"), icon: Settings },
+  ]
 
   return (
     <nav className={cn("flex flex-col gap-1", className)}>
@@ -56,6 +59,7 @@ function NavLinks({ className, onNavigate }: { className?: string; onNavigate?: 
 }
 
 function Sidebar({ collapsed, onToggle }: { collapsed: boolean; onToggle: () => void }) {
+  const t = useTranslations("common")
   return (
     <aside
       className={cn(
@@ -65,9 +69,9 @@ function Sidebar({ collapsed, onToggle }: { collapsed: boolean; onToggle: () => 
     >
       <div className="flex h-14 items-center border-b px-4">
         {collapsed ? (
-          <span className="text-sm font-bold">FJ</span>
+          <span className="text-sm font-bold">{t("appNameShort")}</span>
         ) : (
-          <span className="text-sm font-bold">FreelencerJob</span>
+          <span className="text-sm font-bold">{t("appName")}</span>
         )}
         <Button
           variant="ghost"
@@ -88,6 +92,7 @@ function Sidebar({ collapsed, onToggle }: { collapsed: boolean; onToggle: () => 
 export function DashboardLayout({ children }: { children: React.ReactNode }) {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
+  const t = useTranslations("common")
 
   return (
     <div className="flex min-h-screen">
@@ -104,11 +109,12 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
               </Button>
             </SheetTrigger>
             <SheetContent side="left" className="w-56 p-3">
-              <div className="mb-4 px-3 py-2 text-sm font-bold">FreelencerJob</div>
+              <div className="mb-4 px-3 py-2 text-sm font-bold">{t("appName")}</div>
               <NavLinks onNavigate={() => setMobileOpen(false)} />
             </SheetContent>
           </Sheet>
           <div className="flex-1" />
+          <LanguageSwitcher />
           <UserMenu />
         </header>
         <main className="flex-1 overflow-auto p-4 lg:p-6">{children}</main>

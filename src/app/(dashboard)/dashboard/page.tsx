@@ -1,12 +1,12 @@
 "use client"
 
 import { useJobs, useUserJobs } from "@/hooks/use-jobs"
+import { useTranslations } from "next-intl"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { StatsCardSkeleton, ChartSkeleton } from "@/components/ui/skeleton"
-import { EmptyState } from "@/components/ui/empty-state"
-import { Briefcase, Eye, Clock, DollarSign, TrendingUp, TrendingDown, ArrowRight, RefreshCw } from "lucide-react"
+import { Briefcase, Eye, Clock, DollarSign, TrendingUp, TrendingDown, ArrowRight } from "lucide-react"
 import Link from "next/link"
 import { motion } from "framer-motion"
 import {
@@ -36,6 +36,8 @@ const item = {
 }
 
 export default function DashboardPage() {
+  const t = useTranslations("dashboard")
+  const c = useTranslations("common")
   const { data: jobs, isLoading: jobsLoading } = useJobs()
   const { data: userJobs, isLoading: userJobsLoading } = useUserJobs()
 
@@ -43,28 +45,28 @@ export default function DashboardPage() {
 
   const stats = [
     {
-      label: "Jobs Available",
+      label: t("jobsAvailable"),
       value: jobs?.length ?? 0,
       icon: Briefcase,
       trend: "+12",
       trendUp: true,
     },
     {
-      label: "Applied",
+      label: t("applied"),
       value: userJobs?.filter((j) => j.status === "applied").length ?? 0,
       icon: Eye,
       trend: "+3",
       trendUp: true,
     },
     {
-      label: "In Progress",
+      label: t("inProgress"),
       value: userJobs?.filter((j) => j.status === "in_progress").length ?? 0,
       icon: Clock,
       trend: "0",
       trendUp: true,
     },
     {
-      label: "Earned",
+      label: t("earned"),
       value: `$${(userJobs?.filter((j) => j.status === "paid").length ?? 0) * 100}`,
       icon: DollarSign,
       trend: "+$200",
@@ -106,8 +108,8 @@ export default function DashboardPage() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3 }}
       >
-        <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
-        <p className="text-muted-foreground">Your freelance overview at a glance.</p>
+        <h1 className="text-2xl font-bold tracking-tight">{t("title")}</h1>
+        <p className="text-muted-foreground">{t("subtitle")}</p>
       </motion.div>
 
       {isLoading ? (
@@ -162,7 +164,7 @@ export default function DashboardPage() {
         <motion.div variants={item}>
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle className="text-base">Application Funnel</CardTitle>
+              <CardTitle className="text-base">{t("funnelTitle")}</CardTitle>
               <Badge variant="secondary" className="text-xs">
                 {userJobs?.length ?? 0} total
               </Badge>
@@ -173,10 +175,10 @@ export default function DashboardPage() {
               ) : funnelData.every((d) => d.value === 0) ? (
                 <div className="flex flex-col items-center py-8 text-center">
                   <p className="text-sm text-muted-foreground mb-4">
-                    No applications yet. Save jobs to start your funnel.
+                    {t("funnelEmpty")}
                   </p>
                   <Button variant="outline" size="sm" asChild>
-                    <Link href="/jobs">Browse Jobs</Link>
+                    <Link href="/jobs">{t("funnelAction")}</Link>
                   </Button>
                 </div>
               ) : (
@@ -209,7 +211,7 @@ export default function DashboardPage() {
         <motion.div variants={item}>
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle className="text-base">Platform Distribution</CardTitle>
+              <CardTitle className="text-base">{t("platformTitle")}</CardTitle>
               <Badge variant="secondary" className="text-xs">
                 {jobs?.length ?? 0} jobs
               </Badge>
@@ -220,10 +222,10 @@ export default function DashboardPage() {
               ) : platformData.every((d) => d.value === 0) ? (
                 <div className="flex flex-col items-center py-8 text-center">
                   <p className="text-sm text-muted-foreground mb-4">
-                    No jobs scraped yet. Run the scraper to see platform distribution.
+                    {t("platformEmpty")}
                   </p>
                   <Button variant="outline" size="sm" asChild>
-                    <Link href="/jobs">Go to Jobs</Link>
+                    <Link href="/jobs">{t("platformAction")}</Link>
                   </Button>
                 </div>
               ) : (
@@ -270,8 +272,8 @@ export default function DashboardPage() {
         <motion.div variants={item}>
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle className="text-base">Weekly Activity</CardTitle>
-              <Badge variant="secondary" className="text-xs">This week</Badge>
+              <CardTitle className="text-base">{t("weeklyTitle")}</CardTitle>
+              <Badge variant="secondary" className="text-xs">{t("weeklyBadge")}</Badge>
             </CardHeader>
             <CardContent>
               <div className="h-48">
@@ -313,10 +315,10 @@ export default function DashboardPage() {
         <motion.div variants={item}>
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle className="text-base">Recent Jobs</CardTitle>
+              <CardTitle className="text-base">{t("recentTitle")}</CardTitle>
               <Button variant="ghost" size="sm" className="text-xs" asChild>
                 <Link href="/jobs">
-                  View all <ArrowRight className="ml-1 h-3 w-3" />
+                  {c("viewAll")} <ArrowRight className="ml-1 h-3 w-3" />
                 </Link>
               </Button>
             </CardHeader>
@@ -330,7 +332,7 @@ export default function DashboardPage() {
               ) : recentJobs.length === 0 ? (
                 <div className="flex flex-col items-center py-6 text-center">
                   <p className="text-sm text-muted-foreground">
-                    No jobs yet. Scrape jobs to see them here.
+                    {t("recentEmpty")}
                   </p>
                 </div>
               ) : (

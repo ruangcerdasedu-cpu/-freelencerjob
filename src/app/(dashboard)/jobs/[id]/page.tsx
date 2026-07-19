@@ -2,6 +2,7 @@
 
 import { useParams, useRouter } from "next/navigation"
 import { useState } from "react"
+import { useTranslations } from "next-intl"
 import { useJob, useSaveJob, useAnalyzeJob, useGenerateMentorTasks, useGenerateDraft } from "@/hooks/use-jobs"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -18,6 +19,8 @@ import {
 import Link from "next/link"
 
 export default function JobDetailPage() {
+  const t = useTranslations("jobDetail")
+  const c = useTranslations("common")
   const params = useParams()
   const router = useRouter()
   const { data: job, isLoading, error } = useJob(params.id as string)
@@ -32,7 +35,7 @@ export default function JobDetailPage() {
 
   const handleSave = async () => {
     await saveJob.mutateAsync(job!.id)
-    toast.success("Job saved!")
+    toast.success(t("savedToast"))
   }
 
   const handleAnalyze = async () => {
@@ -42,7 +45,7 @@ export default function JobDetailPage() {
       title: job.title,
       description: job.description,
     })
-    toast.success("AI analysis complete!")
+    toast.success(t("analysisToast"))
   }
 
   const handleMentorBreakdown = async () => {
@@ -53,7 +56,7 @@ export default function JobDetailPage() {
     })
     setMentorTasks(result)
     setActiveTab("mentor")
-    toast.success("Task breakdown generated!")
+    toast.success(t("tasksToast"))
   }
 
   const handleGenerateDraft = async () => {
@@ -64,7 +67,7 @@ export default function JobDetailPage() {
     })
     setDraft(result)
     setActiveTab("communicate")
-    toast.success("Draft generated!")
+    toast.success(t("draftToast"))
   }
 
   const handleCopyDraft = async () => {
@@ -90,18 +93,18 @@ export default function JobDetailPage() {
     return (
       <div className="flex flex-col items-center justify-center h-64">
         <AlertTriangle className="h-8 w-8 text-destructive mb-2" />
-        <p className="text-destructive font-medium">Job not found</p>
+        <p className="text-destructive font-medium">{t("notFound")}</p>
         <Button variant="outline" size="sm" className="mt-4" onClick={() => router.push("/jobs")}>
-          Back to Jobs
+          {t("backToJobs")}
         </Button>
       </div>
     )
   }
 
   const tabs = [
-    { id: "overview" as const, label: "Overview", icon: BarChart3 },
-    { id: "mentor" as const, label: "AI Mentor", icon: ListChecks },
-    { id: "communicate" as const, label: "Draft", icon: MessageSquare },
+    { id: "overview" as const, label: t("tabOverview"), icon: BarChart3 },
+    { id: "mentor" as const, label: t("tabMentor"), icon: ListChecks },
+    { id: "communicate" as const, label: t("tabDraft"), icon: MessageSquare },
   ]
 
   return (
@@ -112,7 +115,7 @@ export default function JobDetailPage() {
       >
         <Button variant="ghost" size="sm" onClick={() => router.back()}>
           <ArrowLeft className="mr-2 h-4 w-4" />
-          Back
+          {c("back")}
         </Button>
       </motion.div>
 
@@ -155,12 +158,12 @@ export default function JobDetailPage() {
           <div className="flex gap-2 flex-wrap">
             <Button size="sm" onClick={handleSave} disabled={saveJob.isPending}>
               <Bookmark className="mr-2 h-4 w-4" />
-              {saveJob.isPending ? "Saving..." : "Save Job"}
+              {saveJob.isPending ? c("saving") : t("saveJob")}
             </Button>
             <Button variant="outline" size="sm" asChild>
               <Link href={job.url} target="_blank">
                 <ExternalLink className="mr-2 h-4 w-4" />
-                Original
+                {t("original")}
               </Link>
             </Button>
           </div>
@@ -180,7 +183,7 @@ export default function JobDetailPage() {
               job.ai_compatibility_score >= 40 ? "warning" : "destructive"
             } className="flex items-center gap-1 text-sm px-3 py-1">
               <Brain className="h-4 w-4" />
-              AI Score: {job.ai_compatibility_score}/100
+              {t("aiScore", { score: job.ai_compatibility_score })}
             </Badge>
             {job.ai_risk_level && (
               <Badge variant={
@@ -188,14 +191,14 @@ export default function JobDetailPage() {
                 job.ai_risk_level === "medium" ? "warning" : "destructive"
               } className="flex items-center gap-1 text-sm px-3 py-1">
                 <AlertTriangle className="h-4 w-4" />
-                {job.ai_risk_level.charAt(0).toUpperCase() + job.ai_risk_level.slice(1)} Risk
+                {t("riskLabel", { risk: job.ai_risk_level.charAt(0).toUpperCase() + job.ai_risk_level.slice(1) })}
               </Badge>
             )}
           </>
         ) : (
           <Button variant="outline" size="sm" onClick={handleAnalyze} disabled={analyzeJob.isPending}>
             <Brain className="mr-2 h-4 w-4" />
-            {analyzeJob.isPending ? "Analyzing..." : "Analyze with AI"}
+            {analyzeJob.isPending ? t("analyzing") : t("analyzeAI")}
           </Button>
         )}
       </motion.div>
@@ -225,7 +228,7 @@ export default function JobDetailPage() {
         >
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">Description</CardTitle>
+              <CardTitle className="text-base">{t("description")}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="whitespace-pre-wrap text-sm leading-relaxed text-muted-foreground">
@@ -240,7 +243,7 @@ export default function JobDetailPage() {
                 <CardHeader>
                   <CardTitle className="text-base flex items-center gap-2">
                     <Sparkles className="h-4 w-4 text-primary" />
-                    Skills Required
+                    {t("skillsRequired")}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -257,19 +260,19 @@ export default function JobDetailPage() {
               <CardHeader>
                 <CardTitle className="text-base flex items-center gap-2">
                   <Users className="h-4 w-4 text-primary" />
-                  Client Information
+                  {t("clientInfo")}
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3 text-sm">
                 {job.client_country && (
                   <div className="flex justify-between items-center">
-                    <span className="text-muted-foreground">Country</span>
+                    <span className="text-muted-foreground">{t("country")}</span>
                     <span className="font-medium">{job.client_country}</span>
                   </div>
                 )}
                 {job.client_rating && (
                   <div className="flex justify-between items-center">
-                    <span className="text-muted-foreground">Rating</span>
+                    <span className="text-muted-foreground">{t("rating")}</span>
                     <span className="flex items-center gap-1 font-medium">
                       <Trophy className="h-3.5 w-3.5 text-yellow-500" />
                       {job.client_rating.toFixed(1)} / 5.0
@@ -278,15 +281,15 @@ export default function JobDetailPage() {
                 )}
                 {job.client_hires !== null && (
                   <div className="flex justify-between items-center">
-                    <span className="text-muted-foreground">Total Hires</span>
+                    <span className="text-muted-foreground">{t("totalHires")}</span>
                     <span className="font-medium">{job.client_hires}</span>
                   </div>
                 )}
                 {job.job_type && (
                   <div className="flex justify-between items-center">
-                    <span className="text-muted-foreground">Job Type</span>
+                    <span className="text-muted-foreground">{t("jobType")}</span>
                     <Badge variant="outline" className="text-xs">
-                      {job.job_type === "fixed" ? "Fixed Price" : "Hourly"}
+                      {job.job_type === "fixed" ? t("fixedPrice") : t("hourly")}
                     </Badge>
                   </div>
                 )}
@@ -299,7 +302,7 @@ export default function JobDetailPage() {
               <CardHeader>
                 <CardTitle className="text-base flex items-center gap-2">
                   <Brain className="h-4 w-4 text-primary" />
-                  AI Insights
+                  {t("aiInsights")}
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3 text-sm">
@@ -311,7 +314,7 @@ export default function JobDetailPage() {
                 )}
                 {(job.ai_analysis as any).red_flags?.length > 0 && (
                   <div>
-                    <p className="font-medium mb-2 text-foreground">Potential Risks:</p>
+                    <p className="font-medium mb-2 text-foreground">{t("potentialRisks")}</p>
                     <ul className="space-y-1">
                       {(job.ai_analysis as any).red_flags.map((flag: string, i: number) => (
                         <li key={i} className="flex items-start gap-2 text-muted-foreground">
@@ -335,7 +338,7 @@ export default function JobDetailPage() {
               ) : (
                 <Brain className="mr-2 h-4 w-4" />
               )}
-              AI Mentor Breakdown
+              {t("mentorBreakdown")}
             </Button>
             <Button variant="outline" onClick={handleGenerateDraft} disabled={generateDraft.isPending}>
               {generateDraft.isPending ? (
@@ -343,7 +346,7 @@ export default function JobDetailPage() {
               ) : (
                 <MessageSquare className="mr-2 h-4 w-4" />
               )}
-              Generate Proposal Draft
+              {t("proposalDraft")}
             </Button>
           </div>
         </motion.div>
@@ -356,7 +359,7 @@ export default function JobDetailPage() {
           className="space-y-4"
         >
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold">Task Breakdown</h2>
+            <h2 className="text-lg font-semibold">{t("taskBreakdown")}</h2>
             {!mentorTasks && (
               <Button size="sm" onClick={handleMentorBreakdown} disabled={generateTasks.isPending}>
                 {generateTasks.isPending ? (
@@ -364,7 +367,7 @@ export default function JobDetailPage() {
                 ) : (
                   <Brain className="mr-2 h-4 w-4" />
                 )}
-                Generate
+                {c("generate")}
               </Button>
             )}
           </div>
@@ -394,7 +397,7 @@ export default function JobDetailPage() {
                 </Badge>
                 <Badge variant="secondary" className="text-sm px-3 py-1">
                   <Clock className="h-3.5 w-3.5 mr-1" />
-                  ~{mentorTasks.total_estimated_hours}h total
+                  {t("totalHours", { hours: mentorTasks.total_estimated_hours })}
                 </Badge>
                 {mentorTasks.tools_needed?.map((tool: string) => (
                   <Badge key={tool} variant="outline" className="text-sm">{tool}</Badge>
@@ -420,7 +423,7 @@ export default function JobDetailPage() {
                           <p className="text-sm text-muted-foreground">{task.description}</p>
                           {task.technical_guide && (
                             <div className="rounded-lg bg-muted/50 p-3 border text-sm">
-                              <p className="text-xs font-semibold text-primary mb-1">Technical Guide:</p>
+                              <p className="text-xs font-semibold text-primary mb-1">{t("technicalGuide")}</p>
                               <p className="text-muted-foreground whitespace-pre-wrap">{task.technical_guide}</p>
                             </div>
                           )}
@@ -438,7 +441,7 @@ export default function JobDetailPage() {
               <CardContent className="py-8 text-center">
                 <Brain className="h-8 w-8 mx-auto mb-3 text-muted-foreground" />
                 <p className="text-sm text-muted-foreground">
-                  Click "Generate" to get an AI-powered breakdown of this job into micro-tasks.
+                  {t("mentorEmpty")}
                 </p>
               </CardContent>
             </Card>
@@ -453,7 +456,7 @@ export default function JobDetailPage() {
           className="space-y-4"
         >
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold">Proposal Draft</h2>
+            <h2 className="text-lg font-semibold">{t("proposalHeading")}</h2>
             {!draft && (
               <Button size="sm" onClick={handleGenerateDraft} disabled={generateDraft.isPending}>
                 {generateDraft.isPending ? (
@@ -461,7 +464,7 @@ export default function JobDetailPage() {
                 ) : (
                   <MessageSquare className="mr-2 h-4 w-4" />
                 )}
-                Generate
+                {c("generate")}
               </Button>
             )}
           </div>
@@ -470,7 +473,7 @@ export default function JobDetailPage() {
             <Card>
               <CardContent className="py-8 text-center">
                 <Loader2 className="h-8 w-8 mx-auto mb-3 animate-spin text-primary" />
-                <p className="text-sm text-muted-foreground">Generating your draft...</p>
+                <p className="text-sm text-muted-foreground">{t("generating")}</p>
               </CardContent>
             </Card>
           )}
@@ -479,7 +482,7 @@ export default function JobDetailPage() {
             <Card>
               <CardHeader className="flex flex-row items-center justify-between">
                 <div className="space-y-1">
-                  <CardTitle className="text-base">{draft.subject || "Proposal Draft"}</CardTitle>
+                  <CardTitle className="text-base">{draft.subject || t("proposalHeading")}</CardTitle>
                   <Badge variant="secondary">{draft.tone}</Badge>
                 </div>
                 <Button variant="outline" size="sm" onClick={handleCopyDraft}>
@@ -488,7 +491,7 @@ export default function JobDetailPage() {
                   ) : (
                     <Copy className="mr-2 h-4 w-4" />
                   )}
-                  {draftCopied ? "Copied!" : "Copy"}
+                  {draftCopied ? c("copied") : c("copy")}
                 </Button>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -499,7 +502,7 @@ export default function JobDetailPage() {
                   <div className="rounded-lg border p-4">
                     <p className="text-sm font-semibold mb-2 flex items-center gap-2">
                       <CheckCircle2 className="h-4 w-4 text-primary" />
-                      Key Talking Points
+                      {t("keyPoints")}
                     </p>
                     <ul className="space-y-1.5">
                       {draft.key_points.map((point: string, i: number) => (
@@ -520,7 +523,7 @@ export default function JobDetailPage() {
               <CardContent className="py-8 text-center">
                 <MessageSquare className="h-8 w-8 mx-auto mb-3 text-muted-foreground" />
                 <p className="text-sm text-muted-foreground">
-                  Click "Generate" to create a professional proposal draft for this job.
+                  {t("draftEmpty")}
                 </p>
               </CardContent>
             </Card>

@@ -1,17 +1,18 @@
 "use client"
 
 import { useState } from "react"
+import { useTranslations } from "next-intl"
 import { useJobs, useSaveJob, useAnalyzeJob, useTriggerScrape } from "@/hooks/use-jobs"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { JobCardSkeleton } from "@/components/ui/skeleton"
 import { EmptyState } from "@/components/ui/empty-state"
 import {
-  Search, SlidersHorizontal, Brain, Bookmark, RefreshCw,
-  DollarSign, Clock, ExternalLink, LayoutGrid, List, Filter,
-  ArrowUpDown, ChevronDown
+  Search, Brain, Bookmark, RefreshCw,
+  DollarSign, Clock, LayoutGrid, List, Filter,
+  ArrowUpDown
 } from "lucide-react"
 import Link from "next/link"
 import { toast } from "sonner"
@@ -31,6 +32,7 @@ const item = {
 }
 
 export default function JobsPage() {
+  const t = useTranslations("jobs")
   const [search, setSearch] = useState("")
   const [view, setView] = useState<"list" | "grid">("list")
   const [showFilters, setShowFilters] = useState(false)
@@ -44,19 +46,19 @@ export default function JobsPage() {
     e.preventDefault()
     e.stopPropagation()
     await saveJob.mutateAsync(jobId)
-    toast.success("Job saved!")
+    toast.success(t("savedToast"))
   }
 
   const handleAnalyze = async (jobId: string, title: string, description: string, e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
     await analyzeJob.mutateAsync({ jobId, title, description })
-    toast.success("Analysis complete!")
+    toast.success(t("analysisToast"))
   }
 
   const handleScrape = async () => {
     await triggerScrape.mutateAsync()
-    toast.success("Scraping triggered! Check back soon.")
+    toast.success(t("scrapeToast"))
   }
 
   const scoreColor = (score: number | null) => {
@@ -67,10 +69,10 @@ export default function JobsPage() {
   }
 
   const scoreLabel = (score: number | null) => {
-    if (score === null) return "N/A"
-    if (score >= 70) return "High Match"
-    if (score >= 40) return "Medium"
-    return "Low Match"
+    if (score === null) return t("na")
+    if (score >= 70) return t("highMatch")
+    if (score >= 40) return t("mediumMatch")
+    return t("lowMatch")
   }
 
   return (
@@ -82,13 +84,13 @@ export default function JobsPage() {
         className="flex items-start justify-between"
       >
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Jobs</h1>
-          <p className="text-muted-foreground">AI-curated freelance opportunities from top platforms.</p>
+          <h1 className="text-2xl font-bold tracking-tight">{t("title")}</h1>
+          <p className="text-muted-foreground">{t("subtitle")}</p>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" size="sm" onClick={handleScrape} disabled={triggerScrape.isPending}>
             <RefreshCw className={`mr-2 h-4 w-4 ${triggerScrape.isPending ? "animate-spin" : ""}`} />
-            {triggerScrape.isPending ? "Scraping..." : "Scrape Now"}
+            {triggerScrape.isPending ? t("scraping") : t("scrapeNow")}
           </Button>
         </div>
       </motion.div>
@@ -102,7 +104,7 @@ export default function JobsPage() {
         <div className="relative flex-1 min-w-[200px]">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
-            placeholder="Search jobs by title..."
+            placeholder={t("searchPlaceholder")}
             className="pl-9 h-10"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
@@ -115,7 +117,7 @@ export default function JobsPage() {
           onClick={() => setShowFilters(!showFilters)}
         >
           <Filter className="mr-2 h-4 w-4" />
-          Filters
+          {t("filters")}
         </Button>
         <div className="flex rounded-md border">
           <Button
@@ -145,29 +147,29 @@ export default function JobsPage() {
           className="flex flex-wrap gap-3 rounded-xl border bg-card p-4"
         >
           <div className="space-y-1">
-            <label className="text-xs font-medium text-muted-foreground">Platform</label>
+            <label className="text-xs font-medium text-muted-foreground">{t("platform")}</label>
             <select
               className="h-9 rounded-md border border-input bg-background px-3 text-sm"
               value={filter.platform || ""}
               onChange={(e) => setFilter({ ...filter, platform: e.target.value || undefined })}
             >
-              <option value="">All Platforms</option>
+              <option value="">{t("allPlatforms")}</option>
               <option value="upwork">Upwork</option>
               <option value="freelancer">Freelancer</option>
               <option value="fiverr">Fiverr</option>
             </select>
           </div>
           <div className="space-y-1">
-            <label className="text-xs font-medium text-muted-foreground">Risk Level</label>
+            <label className="text-xs font-medium text-muted-foreground">{t("riskLevel")}</label>
             <select
               className="h-9 rounded-md border border-input bg-background px-3 text-sm"
               value={filter.risk || ""}
               onChange={(e) => setFilter({ ...filter, risk: e.target.value || undefined })}
             >
-              <option value="">All Risk</option>
-              <option value="low">Low Risk</option>
-              <option value="medium">Medium Risk</option>
-              <option value="high">High Risk</option>
+              <option value="">{t("allRisk")}</option>
+              <option value="low">{t("lowRisk")}</option>
+              <option value="medium">{t("mediumRisk")}</option>
+              <option value="high">{t("highRisk")}</option>
             </select>
           </div>
           <div className="flex items-end">
@@ -177,7 +179,7 @@ export default function JobsPage() {
               className="h-9"
               onClick={() => setFilter({})}
             >
-              Clear filters
+              {t("clearFilters")}
             </Button>
           </div>
         </motion.div>
@@ -190,11 +192,11 @@ export default function JobsPage() {
           ) : (
             "-"
           )}{" "}
-          jobs found
+          {t("jobsFound", { count: jobs?.length ?? 0 })}
         </p>
         <div className="flex items-center gap-1">
           <ArrowUpDown className="h-3 w-3" />
-          <span>Newest first</span>
+          <span>{t("newestFirst")}</span>
         </div>
       </div>
 
@@ -209,7 +211,7 @@ export default function JobsPage() {
       {error && (
         <Card>
           <CardContent className="py-8 text-center">
-            <p className="text-destructive">Failed to load jobs. Make sure you have run the SQL schema in Supabase.</p>
+            <p className="text-destructive">{t("loadError")}</p>
           </CardContent>
         </Card>
       )}
@@ -217,16 +219,16 @@ export default function JobsPage() {
       {!isLoading && !error && jobs?.length === 0 && (
         <EmptyState
           icon="search"
-          title="No jobs found"
+          title={t("noJobsFound")}
           description={
             search || filter.platform || filter.risk
-              ? "Try adjusting your search or filters."
-              : "Click 'Scrape Now' to fetch jobs from Upwork and Freelancer.com."
+              ? t("noJobsSearch")
+              : t("noJobsScrape")
           }
           action={
             search || filter.platform || filter.risk
-              ? { label: "Clear Filters", onClick: () => { setSearch(""); setFilter({}) } }
-              : { label: "Scrape Now", onClick: handleScrape }
+              ? { label: t("clearFilters"), onClick: () => { setSearch(""); setFilter({}) } }
+              : { label: t("scrapeNow"), onClick: handleScrape }
           }
         />
       )}
@@ -293,7 +295,7 @@ export default function JobsPage() {
                                 job.ai_risk_level === "low" ? "success" :
                                 job.ai_risk_level === "medium" ? "warning" : "destructive"
                               } className="text-xs">
-                                {job.ai_risk_level} risk
+                                {t("riskLabel", { risk: job.ai_risk_level })}
                               </Badge>
                             )}
                           </div>
@@ -306,7 +308,7 @@ export default function JobsPage() {
                             disabled={analyzeJob.isPending}
                           >
                             <Brain className="h-3 w-3 mr-1" />
-                            Analyze
+                            {t("analyze")}
                           </Button>
                         )}
                         <div className="flex gap-1">
@@ -318,18 +320,6 @@ export default function JobsPage() {
                             disabled={saveJob.isPending}
                           >
                             <Bookmark className="h-3.5 w-3.5" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-7 w-7"
-                            onClick={(e) => {
-                              e.preventDefault()
-                              e.stopPropagation()
-                              window.open(job.url, "_blank")
-                            }}
-                          >
-                            <ExternalLink className="h-3.5 w-3.5" />
                           </Button>
                         </div>
                       </div>

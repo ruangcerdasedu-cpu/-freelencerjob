@@ -3,6 +3,7 @@
 import { createClient } from "@/lib/supabase/client"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Suspense, useState } from "react"
+import { useTranslations } from "next-intl"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -13,6 +14,7 @@ import Link from "next/link"
 function LoginForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
+  const t = useTranslations("auth")
   const registered = searchParams.get("registered")
 
   const [email, setEmail] = useState("")
@@ -49,7 +51,7 @@ function LoginForm() {
       router.refresh()
       router.push("/dashboard")
     } catch {
-      setError("Connection error. Please try again.")
+      setError(t("connectionError"))
       setLoading(false)
     }
   }
@@ -57,30 +59,30 @@ function LoginForm() {
   return (
     <Card className="w-full max-w-sm">
       <CardHeader className="text-center">
-        <CardTitle>Welcome back</CardTitle>
-        <CardDescription>Sign in to your FreelencerJob account</CardDescription>
+        <CardTitle>{t("welcomeBack")}</CardTitle>
+        <CardDescription>{t("signInSubtitle")}</CardDescription>
       </CardHeader>
       <CardContent>
         {registered === "true" && (
           <div className="mb-4 flex items-center gap-2 rounded-lg bg-green-50 dark:bg-green-950 p-3 text-sm text-green-700 dark:text-green-300 border border-green-200 dark:border-green-800">
             <CheckCircle2 className="h-4 w-4 shrink-0" />
-            Account created successfully. Please sign in.
+            {t("accountCreated")}
           </div>
         )}
         <form onSubmit={handleLogin} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="email">{t("email")}</Label>
             <Input
               id="email"
               type="email"
-              placeholder="you@example.com"
+              placeholder={t("emailPlaceholder")}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
+            <Label htmlFor="password">{t("password")}</Label>
             <Input
               id="password"
               type="password"
@@ -91,13 +93,13 @@ function LoginForm() {
           </div>
           {error && <p className="text-sm text-destructive">{error}</p>}
           <Button type="submit" className="w-full" disabled={loading}>
-            {loading ? "Signing in..." : "Sign In"}
+            {loading ? t("signingIn") : t("signInButton")}
           </Button>
         </form>
         <p className="mt-4 text-center text-sm text-muted-foreground">
-          Don&apos;t have an account?{" "}
+          {t("noAccount")}{" "}
           <Link href="/register" className="text-primary hover:underline">
-            Register
+            {t("registerLink")}
           </Link>
         </p>
       </CardContent>

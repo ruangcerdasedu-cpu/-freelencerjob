@@ -1,7 +1,8 @@
 "use client"
 
 import { useUserJobs, useUpdateJobStatus } from "@/hooks/use-jobs"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { useTranslations } from "next-intl"
+import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -10,7 +11,7 @@ import { motion } from "framer-motion"
 import { useSortable } from "@dnd-kit/sortable"
 import { SortableContext, rectSortingStrategy } from "@dnd-kit/sortable"
 import { DndContext, closestCenter } from "@dnd-kit/core"
-import { Brain, MessageSquare, DollarSign, ExternalLink, ChevronRight, GripVertical } from "lucide-react"
+import { Brain, MessageSquare, DollarSign, ExternalLink, ChevronRight } from "lucide-react"
 import Link from "next/link"
 
 const columns = [
@@ -99,14 +100,15 @@ function KanbanCard({ userJob, columnKey }: { userJob: any; columnKey: string })
 }
 
 export default function SavedPage() {
+  const t = useTranslations("saved")
   const { data: userJobs, isLoading } = useUserJobs()
 
   if (isLoading) {
     return (
       <div className="space-y-6">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Saved Jobs</h1>
-          <p className="text-muted-foreground">Track your applications from saved to paid.</p>
+          <h1 className="text-2xl font-bold tracking-tight">{t("title")}</h1>
+          <p className="text-muted-foreground">{t("subtitle")}</p>
         </div>
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
           {Array.from({ length: 6 }).map((_, i) => (
@@ -131,16 +133,16 @@ export default function SavedPage() {
         initial={{ opacity: 0, y: -8 }}
         animate={{ opacity: 1, y: 0 }}
       >
-        <h1 className="text-2xl font-bold tracking-tight">Saved Jobs</h1>
-        <p className="text-muted-foreground">Track your applications from saved to paid.</p>
+        <h1 className="text-2xl font-bold tracking-tight">{t("title")}</h1>
+        <p className="text-muted-foreground">{t("subtitle")}</p>
       </motion.div>
 
       {!userJobs || userJobs.length === 0 ? (
         <EmptyState
           icon="saved"
-          title="No saved jobs yet"
-          description="Browse jobs and save them to start tracking your applications pipeline."
-          action={{ label: "Browse Jobs", href: "/jobs" }}
+          title={t("emptyTitle")}
+          description={t("emptyDesc")}
+          action={{ label: t("browseJobs"), href: "/jobs" }}
         />
       ) : (
         <motion.div
@@ -178,7 +180,7 @@ export default function SavedPage() {
                   ))}
                   {items.length === 0 && (
                     <div className="rounded-lg border-2 border-dashed p-4 text-center">
-                      <p className="text-xs text-muted-foreground">Drop jobs here</p>
+                      <p className="text-xs text-muted-foreground">{t("dropHere")}</p>
                     </div>
                   )}
                 </div>

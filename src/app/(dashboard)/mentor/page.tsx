@@ -3,6 +3,7 @@
 import { Suspense } from "react"
 import { useSearchParams } from "next/navigation"
 import { useState } from "react"
+import { useTranslations } from "next-intl"
 import { useGenerateMentorTasks } from "@/hooks/use-jobs"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -28,6 +29,7 @@ interface MentorResult {
 }
 
 function MentorContent() {
+  const t = useTranslations("mentor")
   const searchParams = useSearchParams()
   const jobId = searchParams.get("jobId")
 
@@ -39,7 +41,7 @@ function MentorContent() {
 
   const handleGenerate = async () => {
     if (!jobDescription.trim()) {
-      toast.error("Please enter a job description")
+      toast.error(t("validation"))
       return
     }
 
@@ -49,7 +51,7 @@ function MentorContent() {
     })
 
     setResult(data)
-    toast.success("Tasks generated!")
+    toast.success(t("successToast"))
   }
 
   const difficultyColor = (d: string) => {
@@ -61,27 +63,27 @@ function MentorContent() {
   return (
     <div className="space-y-6 max-w-4xl">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">AI Mentor</h1>
-        <p className="text-muted-foreground">Break down projects into actionable micro-tasks.</p>
+        <h1 className="text-2xl font-bold tracking-tight">{t("title")}</h1>
+        <p className="text-muted-foreground">{t("subtitle")}</p>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>Job Details</CardTitle>
+          <CardTitle>{t("jobDetails")}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <label className="text-sm font-medium">Job Title</label>
+            <label className="text-sm font-medium">{t("jobTitle")}</label>
             <Input
-              placeholder="e.g., Build a WordPress landing page"
+              placeholder={t("jobTitlePlaceholder")}
               value={jobTitle}
               onChange={(e) => setJobTitle(e.target.value)}
             />
           </div>
           <div className="space-y-2">
-            <label className="text-sm font-medium">Job Description</label>
+            <label className="text-sm font-medium">{t("jobDesc")}</label>
             <Textarea
-              placeholder="Paste the job description here..."
+              placeholder={t("jobDescPlaceholder")}
               className="min-h-[200px]"
               value={jobDescription}
               onChange={(e) => setJobDescription(e.target.value)}
@@ -91,12 +93,12 @@ function MentorContent() {
             {generateTasks.isPending ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Generating...
+                {t("generating")}
               </>
             ) : (
               <>
                 <Bot className="mr-2 h-4 w-4" />
-                Generate Tasks
+                {t("generateTasks")}
               </>
             )}
           </Button>
@@ -111,7 +113,7 @@ function MentorContent() {
             </Badge>
             <Badge variant="secondary">
               <Clock className="h-3 w-3 mr-1" />
-              ~{result.total_estimated_hours}h total
+              {t("totalHours", { hours: result.total_estimated_hours })}
             </Badge>
             {result.tools_needed?.map((tool) => (
               <Badge key={tool} variant="outline">{tool}</Badge>
@@ -131,7 +133,7 @@ function MentorContent() {
                     </div>
                     <Badge variant="secondary" className="text-xs">
                       <Clock className="h-3 w-3 mr-1" />
-                      ~{task.estimated_hours}h
+                      {t("totalHours", { hours: task.estimated_hours })}
                     </Badge>
                   </div>
                 </CardHeader>
@@ -139,7 +141,7 @@ function MentorContent() {
                   <p className="text-sm text-muted-foreground">{task.description}</p>
                   {task.technical_guide && (
                     <div className="rounded-lg bg-muted p-3">
-                      <p className="text-xs font-medium mb-1">Technical Guide:</p>
+                      <p className="text-xs font-medium mb-1">{t("technicalGuide")}</p>
                       <p className="text-sm whitespace-pre-wrap">{task.technical_guide}</p>
                     </div>
                   )}

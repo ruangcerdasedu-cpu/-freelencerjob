@@ -3,6 +3,7 @@
 import { Suspense } from "react"
 import { useSearchParams } from "next/navigation"
 import { useState } from "react"
+import { useTranslations } from "next-intl"
 import { useGenerateDraft } from "@/hooks/use-jobs"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -13,14 +14,15 @@ import { toast } from "sonner"
 import { MessageSquare, Loader2, Copy, Check } from "lucide-react"
 
 const draftTypes = [
-  { value: "cover_letter", label: "Cover Letter" },
-  { value: "proposal", label: "Proposal" },
-  { value: "negotiation", label: "Negotiation" },
-  { value: "follow_up", label: "Follow Up" },
-  { value: "revision", label: "Revision Request" },
+  { value: "cover_letter", labelKey: "coverLetter" },
+  { value: "proposal", labelKey: "proposal" },
+  { value: "negotiation", labelKey: "negotiation" },
+  { value: "follow_up", labelKey: "followUp" },
+  { value: "revision", labelKey: "revisionRequest" },
 ]
 
 function CommunicateContent() {
+  const t = useTranslations("communicate")
   const searchParams = useSearchParams()
   const jobId = searchParams.get("jobId")
 
@@ -35,7 +37,7 @@ function CommunicateContent() {
 
   const handleGenerate = async () => {
     if (!jobTitle.trim()) {
-      toast.error("Please enter a job title")
+      toast.error(t("validation"))
       return
     }
 
@@ -47,7 +49,7 @@ function CommunicateContent() {
     })
 
     setResult(data)
-    toast.success("Draft generated!")
+    toast.success(t("generatedToast"))
   }
 
   const handleCopy = async () => {
@@ -55,24 +57,24 @@ function CommunicateContent() {
       await navigator.clipboard.writeText(result.body)
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
-      toast.success("Copied to clipboard!")
+      toast.success(t("copiedToast"))
     }
   }
 
   return (
     <div className="space-y-6 max-w-4xl">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Communication Assistant</h1>
-        <p className="text-muted-foreground">Professional AI-generated message drafts.</p>
+        <h1 className="text-2xl font-bold tracking-tight">{t("title")}</h1>
+        <p className="text-muted-foreground">{t("subtitle")}</p>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>Draft Settings</CardTitle>
+          <CardTitle>{t("draftSettings")}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <label className="text-sm font-medium">Draft Type</label>
+            <label className="text-sm font-medium">{t("draftType")}</label>
             <div className="flex flex-wrap gap-2">
               {draftTypes.map((type) => (
                 <Badge
@@ -81,32 +83,32 @@ function CommunicateContent() {
                   className="cursor-pointer"
                   onClick={() => setDraftType(type.value)}
                 >
-                  {type.label}
+                  {t(type.labelKey)}
                 </Badge>
               ))}
             </div>
           </div>
           <div className="space-y-2">
-            <label className="text-sm font-medium">Job Title</label>
+            <label className="text-sm font-medium">{t("jobTitle")}</label>
             <Input
-              placeholder="e.g., WordPress Website Redesign"
+              placeholder={t("jobTitlePlaceholder")}
               value={jobTitle}
               onChange={(e) => setJobTitle(e.target.value)}
             />
           </div>
           <div className="space-y-2">
-            <label className="text-sm font-medium">Client Message (optional)</label>
+            <label className="text-sm font-medium">{t("clientMessage")}</label>
             <Textarea
-              placeholder="Paste the client's message or job posting..."
+              placeholder={t("clientMsgPlaceholder")}
               className="min-h-[100px]"
               value={clientMessage}
               onChange={(e) => setClientMessage(e.target.value)}
             />
           </div>
           <div className="space-y-2">
-            <label className="text-sm font-medium">Additional Context (optional)</label>
+            <label className="text-sm font-medium">{t("additionalContext")}</label>
             <Textarea
-              placeholder="Any additional context about this project..."
+              placeholder={t("contextPlaceholder")}
               className="min-h-[80px]"
               value={context}
               onChange={(e) => setContext(e.target.value)}
@@ -116,12 +118,12 @@ function CommunicateContent() {
             {generateDraft.isPending ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Generating...
+                {t("generating")}
               </>
             ) : (
               <>
                 <MessageSquare className="mr-2 h-4 w-4" />
-                Generate Draft
+                {t("generateDraft")}
               </>
             )}
           </Button>
@@ -132,7 +134,7 @@ function CommunicateContent() {
         <Card>
           <CardHeader>
             <div className="flex items-center justify-between">
-              <CardTitle className="text-base">{result.subject || "Draft"}</CardTitle>
+              <CardTitle className="text-base">{result.subject || t("draft")}</CardTitle>
               <div className="flex items-center gap-2">
                 <Badge variant="secondary">{result.tone}</Badge>
                 <Button variant="ghost" size="sm" onClick={handleCopy}>
@@ -147,7 +149,7 @@ function CommunicateContent() {
             </div>
             {result.key_points?.length > 0 && (
               <div>
-                <p className="text-sm font-medium mb-2">Key Points:</p>
+                <p className="text-sm font-medium mb-2">{t("keyPoints")}</p>
                 <ul className="list-disc list-inside space-y-1">
                   {result.key_points.map((point, i) => (
                     <li key={i} className="text-sm text-muted-foreground">{point}</li>
