@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { useTranslations } from "next-intl"
 import { useJobs, useSaveJob, useAnalyzeJob, useTriggerScrape, useManualJob, useRssScrape } from "@/hooks/use-jobs"
+import { useProfile } from "@/hooks/use-profile"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -51,6 +52,7 @@ export default function JobsPage() {
   const triggerScrape = useTriggerScrape()
   const manualJob = useManualJob()
   const rssScrape = useRssScrape()
+  const { data: profile } = useProfile()
 
   const handleSave = async (jobId: string, e: React.MouseEvent) => {
     e.preventDefault()
@@ -62,7 +64,7 @@ export default function JobsPage() {
   const handleAnalyze = async (jobId: string, title: string, description: string, e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
-    await analyzeJob.mutateAsync({ jobId, title, description })
+    await analyzeJob.mutateAsync({ jobId, title, description, userSkills: profile?.skills })
     toast.success(t("analysisToast"))
   }
 
@@ -399,6 +401,11 @@ export default function JobsPage() {
                               <Brain className="h-3 w-3 mr-1" />
                               {job.ai_compatibility_score} - {scoreLabel(job.ai_compatibility_score)}
                             </Badge>
+                            {(job.ai_analysis as any)?.skill_match !== undefined && (
+                              <Badge variant="secondary" className="text-xs">
+                                Match: {(job.ai_analysis as any).skill_match}%
+                              </Badge>
+                            )}
                             {job.ai_risk_level && (
                               <Badge variant={
                                 job.ai_risk_level === "low" ? "success" :

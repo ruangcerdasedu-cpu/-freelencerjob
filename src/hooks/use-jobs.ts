@@ -134,11 +134,11 @@ export function useAnalyzeJob() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: async ({ jobId, title, description }: { jobId: string; title: string; description: string }) => {
+    mutationFn: async ({ jobId, title, description, userSkills }: { jobId: string; title: string; description: string; userSkills?: string[] }) => {
       const response = await fetch("/api/ai/analyze-job", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ jobId, title, description }),
+        body: JSON.stringify({ jobId, title, description, userSkills }),
       })
 
       if (!response.ok) {

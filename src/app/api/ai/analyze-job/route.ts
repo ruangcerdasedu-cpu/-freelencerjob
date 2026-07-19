@@ -2,13 +2,18 @@ import { NextRequest, NextResponse } from "next/server"
 
 const GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions"
 
-const SYSTEM_PROMPT = `You are an AI job analyzer for a freelance platform. Analyze the job description and return a JSON object with:
-- compatibility_score: number 0-100 (how suitable this job is for AI-assisted work)
-- risk_level: "low" | "medium" | "high" (risk of the job being problematic)
-- required_skills: string[] (skills needed)
-- estimated_hours: number (estimated hours to complete)
-- reasoning: string (brief explanation)
-- red_flags: string[] (potential issues like unclear scope, unrealistic budget)`
+const SYSTEM_PROMPT = `You are an AI job analyzer for a freelance platform. Analyze the job and the freelancer's skills.
+
+Return a JSON object with:
+- compatibility_score: number 0-100 (overall fit including skill match, AI feasibility)
+- skill_match: number 0-100 (how well user skills match job requirements)
+- risk_level: "low" | "medium" | "high"
+- required_skills: string[] (skills needed for this job)
+- matched_skills: string[] (skills the user has that match)
+- missing_skills: string[] (skills the user needs)
+- estimated_hours: number
+- reasoning: string (brief explanation of compatibility)
+- red_flags: string[]`
 
 export async function POST(request: NextRequest) {
   const groqKey = process.env.GROQ_API_KEY
@@ -17,13 +22,17 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "GROQ_API_KEY not configured" }, { status: 500 })
   }
 
-  const { jobId, title, description } = await request.json()
+  const { jobId, title, description, userSkills } = await request.json()
 
   if (!description) {
     return NextResponse.json({ error: "description is required" }, { status: 400 })
   }
 
   try {
+    const skillsText = userSkills?.length
+      ? `\n\nMy Skills: ${userSkills.join(", ")}`
+      : ""
+
     const response = await fetch(GROQ_API_URL, {
       method: "POST",
       headers: {
@@ -36,7 +45,7 @@ export async function POST(request: NextRequest) {
           { role: "system", content: SYSTEM_PROMPT },
           {
             role: "user",
-            content: `Title: ${title || "Untitled"}\n\nDescription:\n${description}`,
+            content: `Title: ${title || "Untitled"}\n\nDescription:\n${description}${skillsText}`,
           },
         ],
         temperature: 0.3,
