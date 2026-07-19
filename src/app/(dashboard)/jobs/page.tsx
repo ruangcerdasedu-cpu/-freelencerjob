@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { useTranslations } from "next-intl"
-import { useJobs, useSaveJob, useAnalyzeJob, useTriggerScrape, useManualJob } from "@/hooks/use-jobs"
+import { useJobs, useSaveJob, useAnalyzeJob, useTriggerScrape, useManualJob, useRssScrape } from "@/hooks/use-jobs"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -18,7 +18,7 @@ import { Label } from "@/components/ui/label"
 import {
   Search, Brain, Bookmark, RefreshCw,
   DollarSign, Clock, LayoutGrid, List, Filter,
-  ArrowUpDown, Plus
+  ArrowUpDown, Plus, Rss
 } from "lucide-react"
 import Link from "next/link"
 import { toast } from "sonner"
@@ -42,14 +42,15 @@ export default function JobsPage() {
   const [search, setSearch] = useState("")
   const [view, setView] = useState<"list" | "grid">("list")
   const [showFilters, setShowFilters] = useState(false)
-  const [filter, setFilter] = useState<{ platform?: string; risk?: string }>({})
+  const [filter, setFilter] = useState<{ platform?: string; risk?: string; source?: string }>({})
   const [dialogOpen, setDialogOpen] = useState(false)
   const [form, setForm] = useState({ title: "", description: "", url: "", budget_min: "", budget_max: "", currency: "USD", skills: "", client_country: "" })
-  const { data: jobs, isLoading, error } = useJobs({ search: search || undefined, ...filter })
+  const { data: jobs, isLoading, error } = useJobs({ search: search || undefined, platform: filter.platform, riskLevel: filter.risk, source: filter.source })
   const saveJob = useSaveJob()
   const analyzeJob = useAnalyzeJob()
   const triggerScrape = useTriggerScrape()
   const manualJob = useManualJob()
+  const rssScrape = useRssScrape()
 
   const handleSave = async (jobId: string, e: React.MouseEvent) => {
     e.preventDefault()
@@ -182,6 +183,10 @@ export default function JobsPage() {
             <RefreshCw className={`mr-2 h-4 w-4 ${triggerScrape.isPending ? "animate-spin" : ""}`} />
             {triggerScrape.isPending ? t("scraping") : t("scrapeNow")}
           </Button>
+          <Button variant="outline" size="sm" onClick={() => rssScrape.mutateAsync().then(() => toast.success(t("rssToast")))} disabled={rssScrape.isPending}>
+            <Rss className={`mr-2 h-4 w-4 ${rssScrape.isPending ? "animate-spin" : ""}`} />
+            {rssScrape.isPending ? t("fetching") : t("rssFeed")}
+          </Button>
         </div>
       </motion.div>
 
@@ -247,7 +252,18 @@ export default function JobsPage() {
               <option value="upwork">Upwork</option>
               <option value="freelancer">Freelancer</option>
               <option value="fiverr">Fiverr</option>
-              <option value="manual">{t("addJob")}</option>
+            </select>
+          </div>
+          <div className="space-y-1">
+            <label className="text-xs font-medium text-muted-foreground">Source</label>
+            <select
+              className="h-9 rounded-md border border-input bg-background px-3 text-sm"
+              value={filter.source || ""}
+              onChange={(e) => setFilter({ ...filter, source: e.target.value || undefined })}
+            >
+              <option value="">All</option>
+              <option value="scraped">Scraped</option>
+              <option value="manual">Manual</option>
             </select>
           </div>
           <div className="space-y-1">
@@ -344,7 +360,9 @@ export default function JobsPage() {
                           </h3>
                         </div>
                         <div className="flex flex-wrap items-center gap-2 mb-2">
-                          <Badge variant="secondary" className="text-xs font-normal">{job.platform}</Badge>
+                          <Badge variant="secondary" className="text-xs font-normal">
+                            {job.external_id?.startsWith?.("manual_") ? "Manual" : job.platform}
+                          </Badge>
                           {job.budget_min && (
                             <span className="text-xs text-muted-foreground flex items-center gap-0.5">
                               <DollarSign className="h-3 w-3" />

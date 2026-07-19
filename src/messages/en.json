@@ -162,7 +162,10 @@
     "skillsLabel": "Skills (comma separated)",
     "clientCountryLabel": "Client Country (optional)",
     "addSuccess": "Job added successfully!",
-    "addError": "Failed to add job"
+    "addError": "Failed to add job",
+    "rssFeed": "RSS Feed",
+    "fetching": "Fetching...",
+    "rssToast": "RSS feed fetched!"
   },
   "jobDetail": {
     "notFound": "Job not found",

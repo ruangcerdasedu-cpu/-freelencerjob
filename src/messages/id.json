@@ -162,7 +162,10 @@
     "skillsLabel": "Keahlian (pisahkan dengan koma)",
     "clientCountryLabel": "Negara Klien (opsional)",
     "addSuccess": "Pekerjaan berhasil ditambahkan!",
-    "addError": "Gagal menambahkan pekerjaan"
+    "addError": "Gagal menambahkan pekerjaan",
+    "rssFeed": "RSS Feed",
+    "fetching": "Memuat...",
+    "rssToast": "RSS feed berhasil diambil!"
   },
   "jobDetail": {
     "notFound": "Pekerjaan tidak ditemukan",

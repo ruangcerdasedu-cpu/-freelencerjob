@@ -11,6 +11,7 @@ export function useJobs(filters?: {
   riskLevel?: string
   minScore?: number
   search?: string
+  source?: string
 }) {
   return useQuery({
     queryKey: ["jobs", filters],
@@ -33,6 +34,9 @@ export function useJobs(filters?: {
       }
       if (filters?.search) {
         query = query.ilike("title", `%${filters.search}%`)
+      }
+      if (filters?.source === "manual") {
+        query = query.ilike("external_id", "manual_%")
       }
 
       const { data, error } = await query
@@ -231,6 +235,24 @@ export function useTriggerScrape() {
       const response = await fetch("/api/scraper/trigger", { method: "POST" })
       if (!response.ok) throw new Error("Scrape trigger failed")
       return response.json()
+    },
+  })
+}
+
+export function useRssScrape() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async () => {
+      const response = await fetch("/api/scraper/rss", { method: "POST" })
+      if (!response.ok) {
+        const err = await response.json()
+        throw new Error(err.error || "RSS scrape failed")
+      }
+      return response.json()
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["jobs"] })
     },
   })
 }

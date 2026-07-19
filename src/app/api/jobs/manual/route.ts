@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
       .from("jobs")
       .insert({
         external_id: externalId,
-        platform: "manual",
+        platform: "upwork",
         title,
         description,
         url: url || "",
