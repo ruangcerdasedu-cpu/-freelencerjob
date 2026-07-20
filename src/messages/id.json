@@ -112,6 +112,7 @@
     "saved": "Tersimpan",
     "mentor": "Mentor",
     "communicate": "Komunikasi",
+    "mentorChat": "Chat Mentor",
     "pricing": "Pricing",
     "settings": "Pengaturan"
   },
@@ -268,7 +269,24 @@
     "finalDeliverable": "Hasil Akhir",
     "assigneeAi": "AI",
     "assigneeHuman": "Kamu",
-    "assigneeBoth": "AI + Kamu"
+    "assigneeBoth": "AI + Kamu",
+    "chatAssistant": "Asisten Chat"
+  },
+  "mentorChat": {
+    "title": "Chat Mentor AI",
+    "subtitle": "Ngobrol dengan AI tentang tugas proyek Anda.",
+    "welcomeMessage": "Halo! Saya asisten mentor AI Anda. Tanya apa saja tentang tugas proyek Anda — saya bisa jelaskan langkah lebih detail, sarankan alternatif gratis, atau bantu debug masalah.",
+    "chatReady": "Halo! Saya siap membantu proyek \"{title}\" Anda. Ada yang ingin ditanyakan?",
+    "inputPlaceholder": "Tanya tentang proyek...",
+    "send": "Kirim",
+    "thinking": "AI sedang berpikir...",
+    "error": "Maaf, saya tidak bisa merespon. Silakan coba lagi.",
+    "projectTitle": "Judul Proyek",
+    "projectTitlePlaceholder": "Mis: 3D Character Modeling",
+    "projectDesc": "Deskripsi Proyek",
+    "projectDescPlaceholder": "Deskripsikan proyek agar AI bisa membantu lebih baik...",
+    "startChat": "Mulai Chat",
+    "changeProject": "Ganti Proyek"
   },
   "communicate": {
     "title": "Asisten Komunikasi",

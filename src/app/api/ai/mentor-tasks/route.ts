@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 
 const GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions"
 
-const SYSTEM_PROMPT = `You are a senior AI project mentor. Analyze the given freelance project and produce a detailed breakdown.
+const SYSTEM_PROMPT = `You are a senior AI project mentor for freelance beginners. Analyze the given freelance project and produce a detailed breakdown.
 
 Return valid JSON with this structure:
 {
@@ -11,11 +11,15 @@ Return valid JSON with this structure:
   "total_completion_percentage": number (0-100, how feasible this project is with AI assistance),
   "estimated_duration": "string like '1-2 weeks' or '3-4 weeks'",
   "tools_recommended": [
-    { "name": "ChatGPT", "use_case": "what to use it for", "url": "https://chat.openai.com" },
-    { "name": "Claude", "use_case": "what to use it for", "url": "https://claude.ai" },
-    { "name": "Gemini", "use_case": "what to use it for", "url": "https://gemini.google.com" },
-    { "name": "Cursor AI", "use_case": "what to use it for", "url": "https://cursor.sh" },
-    { "name": "GitHub Copilot", "use_case": "what to use it for", "url": "https://github.com/features/copilot" }
+    {
+      "name": "Tool name",
+      "use_case": "what to use it for",
+      "url": "https://...",
+      "cost": "free" | "freemium" | "paid",
+      "cost_detail": "e.g., '🆓 Gratis', '💵 $20/bln', '💰 Freemium (fitur dasar gratis)'",
+      "beginner_friendly": true/false,
+      "alternative_free": "name of free alternative if this tool is paid, or null"
+    }
   ],
   "tasks": [
     {
@@ -25,11 +29,28 @@ Return valid JSON with this structure:
       "assignee": "ai" | "human" | "both",
       "completion_percentage": number (0-100, how much of the project this task represents),
       "estimated_hours": number,
+      "sub_steps": [
+        "1. Langkah konkret pertama — berikan instruksi yang sangat detail dan mudah diikuti pemula",
+        "2. Langkah kedua — sertakan shortcut/keyboard jika relevan",
+        "3. ..."
+      ],
       "technical_guide": "Step-by-step instructions, include specific prompts for AI tools if assignee is ai or both",
+      "tools": [
+        {
+          "name": "Blender",
+          "cost": "free",
+          "cost_detail": "🆓 Gratis",
+          "url": "https://blender.org",
+          "beginner_friendly": true,
+          "tutorial_url": "https://youtube.com/results?search_query=blender+beginner+tutorial+2024"
+        }
+      ],
+      "tutorial_url": "Link YouTube atau resource belajar pemula untuk task ini (gunakan search query jika tidak hafal URL tepat)",
       "deliverable": "What is produced at the end of this task",
       "ai_tools": [
-        { "name": "ChatGPT", "how_to_use": "specific prompt or workflow to use" },
-        { "name": "Claude", "how_to_use": "specific prompt or workflow to use" }
+        { "name": "ChatGPT", "how_to_use": "specific prompt template the user can copy-paste" },
+        { "name": "Claude", "how_to_use": "specific prompt template" },
+        { "name": "Opencode", "how_to_use": "Use opencode (opencode.ai) to help write Python scripts for Blender automation, debug errors, and plan your workflow. Example prompt: 'Buat script Python Blender untuk batch export .obj dan .stl dari semua objek di scene'." }
       ]
     }
   ],
@@ -40,11 +61,17 @@ Return valid JSON with this structure:
 }
 
 Rules:
-- Be specific and practical, not generic
+- Be specific and practical, not generic — especially for beginners with NO experience
+- Each sub_step must be an actionable instruction a complete beginner can follow
+- For each tool include cost_detail with emoji: 🆓 Gratis / 💰 Freemium / 💵 Berbayar
+- Always include free or freemium tools as primary recommendations
+- For paid tools, always suggest a free alternative
+- Always include opencode (https://opencode.ai) as one of the recommended AI tools with practical use case
+- Always include a tutorial_url per task pointing to beginner-friendly YouTube search or resource
 - For each ai_tools entry, give an actual prompt template the user can copy-paste
 - competitive_advantages should help the user win against other freelancers (e.g., using AI to deliver faster, offering revision rounds, showing portfolio strategy, communication style)
 - completion_percentage across all tasks should sum to ~100
-- estimated_hours should be realistic for a freelancer with AI assistance`
+- estimated_hours should be realistic for a complete beginner with AI assistance`
 
 export async function POST(request: NextRequest) {
   const groqKey = process.env.GROQ_API_KEY

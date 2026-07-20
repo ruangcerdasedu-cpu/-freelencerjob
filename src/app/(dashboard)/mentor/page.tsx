@@ -13,11 +13,21 @@ import { Input } from "@/components/ui/input"
 import { Progress } from "@/components/ui/progress"
 import { Separator } from "@/components/ui/separator"
 import { toast } from "sonner"
-import { Bot, Loader2, Clock, Sparkles, Target, Trophy, ExternalLink, User, Cpu } from "lucide-react"
+import { MentorChat } from "@/components/mentor-chat"
+import { Bot, Loader2, Clock, Sparkles, Target, Trophy, ExternalLink, User, Cpu, BookOpen, Play, MessageCircle } from "lucide-react"
 
 interface AiTool {
   name: string
   how_to_use: string
+}
+
+interface ToolInTask {
+  name: string
+  cost: string
+  cost_detail: string
+  url: string
+  beginner_friendly: boolean
+  tutorial_url?: string
 }
 
 interface Task {
@@ -27,7 +37,10 @@ interface Task {
   assignee: "ai" | "human" | "both"
   completion_percentage: number
   estimated_hours: number
+  sub_steps: string[]
   technical_guide: string
+  tools: ToolInTask[]
+  tutorial_url: string
   deliverable: string
   ai_tools: AiTool[]
 }
@@ -36,6 +49,10 @@ interface ToolRecommendation {
   name: string
   use_case: string
   url: string
+  cost: string
+  cost_detail: string
+  beginner_friendly: boolean
+  alternative_free: string | null
 }
 
 interface CompetitiveAdvantage {
@@ -80,6 +97,7 @@ function MentorContent() {
   const [jobTitle, setJobTitle] = useState("")
   const [jobDescription, setJobDescription] = useState("")
   const [result, setResult] = useState<MentorResult | null>(null)
+  const [chatOpen, setChatOpen] = useState(false)
 
   const generateTasks = useGenerateMentorTasks()
 
@@ -104,11 +122,19 @@ function MentorContent() {
     return "destructive"
   }
 
+  const costBadgeColor = (cost: string) => {
+    if (cost === "free") return "success"
+    if (cost === "freemium") return "warning"
+    return "destructive"
+  }
+
   return (
     <div className="space-y-6 max-w-4xl">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">{t("title")}</h1>
-        <p className="text-muted-foreground">{t("subtitle")}</p>
+      <div className="flex items-start justify-between">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">{t("title")}</h1>
+          <p className="text-muted-foreground">{t("subtitle")}</p>
+        </div>
       </div>
 
       <Card>
@@ -190,11 +216,24 @@ function MentorContent() {
                     className="flex items-start gap-3 rounded-lg border p-3 hover:bg-accent transition-colors group"
                   >
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-1.5">
+                      <div className="flex items-center gap-1.5 flex-wrap">
                         <span className="text-sm font-medium">{tool.name}</span>
+                        <Badge variant={costBadgeColor(tool.cost)} className="text-[10px]">
+                          {tool.cost_detail}
+                        </Badge>
+                        {tool.beginner_friendly && (
+                          <Badge variant="secondary" className="text-[10px]">
+                            ✅ Pemula
+                          </Badge>
+                        )}
                         <ExternalLink className="h-3 w-3 text-muted-foreground group-hover:text-primary transition-colors" />
                       </div>
                       <p className="text-xs text-muted-foreground mt-0.5">{tool.use_case}</p>
+                      {tool.cost !== "free" && tool.alternative_free && (
+                        <p className="text-xs text-emerald-600 dark:text-emerald-400 mt-1">
+                          🆓 Alternatif gratis: {tool.alternative_free}
+                        </p>
+                      )}
                     </div>
                   </a>
                 ))}
@@ -229,7 +268,6 @@ function MentorContent() {
                       </Badge>
                     </div>
                   </div>
-                  {/* Progress bar for completion % */}
                   <div className="mt-3">
                     <div className="flex items-center justify-between text-xs text-muted-foreground mb-1">
                       <span>{t("projectProgress")}</span>
@@ -241,6 +279,54 @@ function MentorContent() {
                 <CardContent className="space-y-3 pt-0">
                   <p className="text-sm text-muted-foreground">{task.description}</p>
 
+                  {/* Sub Steps */}
+                  {task.sub_steps?.length > 0 && (
+                    <div className="rounded-lg border border-blue-200 dark:border-blue-900 bg-blue-50/50 dark:bg-blue-950/30 p-3 space-y-2">
+                      <p className="text-xs font-semibold flex items-center gap-1.5 text-blue-700 dark:text-blue-300">
+                        <BookOpen className="h-3 w-3" />
+                        Langkah Detail
+                      </p>
+                      <ol className="list-decimal list-inside space-y-1">
+                        {task.sub_steps.map((step, i) => (
+                          <li key={i} className="text-sm text-muted-foreground">{step}</li>
+                        ))}
+                      </ol>
+                    </div>
+                  )}
+
+                  {/* Task-specific Tools */}
+                  {task.tools?.length > 0 && (
+                    <div className="flex flex-wrap gap-1.5">
+                      {task.tools.map((tool) => (
+                        <a
+                          key={tool.name}
+                          href={tool.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          <Badge variant="secondary" className="text-xs cursor-pointer hover:bg-accent">
+                            {tool.name}
+                            <span className="ml-1">{tool.cost_detail}</span>
+                          </Badge>
+                        </a>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Tutorial Link */}
+                  {task.tutorial_url && (
+                    <a
+                      href={task.tutorial_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-1.5 text-xs text-primary hover:underline"
+                    >
+                      <Play className="h-3 w-3" />
+                      Tutorial: {task.title}
+                    </a>
+                  )}
+
+                  {/* AI Tools for Task */}
                   {task.ai_tools?.length > 0 && (
                     <div className="rounded-lg border border-purple-200 dark:border-purple-900 bg-purple-50/50 dark:bg-purple-950/30 p-3 space-y-2">
                       <p className="text-xs font-semibold flex items-center gap-1.5 text-purple-700 dark:text-purple-300">
@@ -310,6 +396,17 @@ function MentorContent() {
             </Card>
           )}
         </>
+      )}
+
+      {/* Floating Chat Button */}
+      {result && (
+        <MentorChat
+          open={chatOpen}
+          onOpenChange={setChatOpen}
+          projectTitle={jobTitle || "Untitled Project"}
+          projectDescription={jobDescription}
+          tasks={result.tasks}
+        />
       )}
     </div>
   )

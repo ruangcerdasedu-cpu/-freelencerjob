@@ -112,6 +112,7 @@
     "saved": "Saved",
     "mentor": "Mentor",
     "communicate": "Communicate",
+    "mentorChat": "Mentor Chat",
     "pricing": "Pricing",
     "settings": "Settings"
   },
@@ -268,7 +269,24 @@
     "finalDeliverable": "Final Deliverable",
     "assigneeAi": "AI",
     "assigneeHuman": "You",
-    "assigneeBoth": "AI + You"
+    "assigneeBoth": "AI + You",
+    "chatAssistant": "Chat Assistant"
+  },
+  "mentorChat": {
+    "title": "AI Mentor Chat",
+    "subtitle": "Chat with AI about your project tasks.",
+    "welcomeMessage": "Hi! I'm your AI mentor assistant. Ask me anything about your project tasks — I can explain steps in more detail, suggest free alternatives, or help you debug issues.",
+    "chatReady": "Hi! I'm ready to help with your project \"{title}\". What would you like to know?",
+    "inputPlaceholder": "Ask about your project...",
+    "send": "Send",
+    "thinking": "AI is thinking...",
+    "error": "Sorry, I couldn't respond. Please try again.",
+    "projectTitle": "Project Title",
+    "projectTitlePlaceholder": "e.g., 3D Character Modeling",
+    "projectDesc": "Project Description",
+    "projectDescPlaceholder": "Describe your project so AI can help better...",
+    "startChat": "Start Chat",
+    "changeProject": "Change Project"
   },
   "communicate": {
     "title": "Communication Assistant",
