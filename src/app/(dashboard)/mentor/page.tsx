@@ -14,7 +14,7 @@ import { Progress } from "@/components/ui/progress"
 import { Separator } from "@/components/ui/separator"
 import { toast } from "sonner"
 import { MentorChat } from "@/components/mentor-chat"
-import { Bot, Loader2, Clock, Sparkles, Target, Trophy, ExternalLink, User, Cpu, BookOpen, Play, MessageCircle } from "lucide-react"
+import { Bot, Loader2, Clock, Sparkles, Target, Trophy, ExternalLink, User, Cpu, BookOpen, Play, MessageCircle, AlertTriangle, Shield, AlertCircle, CheckCircle2, ThumbsUp, ThumbsDown } from "lucide-react"
 
 interface AiTool {
   name: string
@@ -65,6 +65,12 @@ interface MentorResult {
   difficulty: string
   total_completion_percentage: number
   estimated_duration: string
+  risk_level: "low" | "medium" | "high" | "critical"
+  risk_assessment: string
+  success_factors: string[]
+  failure_factors: string[]
+  recommendation: "proceed" | "proceed_with_caution" | "not_recommended"
+  warning_message: string
   tools_recommended: ToolRecommendation[]
   tasks: Task[]
   competitive_advantages: CompetitiveAdvantage[]
@@ -194,6 +200,102 @@ function MentorContent() {
                   {result.total_completion_percentage}% {t("feasible")}
                 </Badge>
               </div>
+            </CardContent>
+          </Card>
+
+          {/* Risk Assessment Card */}
+          {(result.risk_level === "critical" || result.risk_level === "high") && result.warning_message && (
+            <Card className="border-red-300 dark:border-red-800 bg-red-50/80 dark:bg-red-950/40">
+              <CardContent className="p-4 flex items-start gap-3">
+                <AlertTriangle className="h-5 w-5 text-red-600 dark:text-red-400 shrink-0 mt-0.5" />
+                <p className="text-sm font-medium text-red-800 dark:text-red-200">{result.warning_message}</p>
+              </CardContent>
+            </Card>
+          )}
+
+          <Card className={`border-l-4 ${
+            result.risk_level === "low" ? "border-l-emerald-500" :
+            result.risk_level === "medium" ? "border-l-amber-500" :
+            result.risk_level === "high" ? "border-l-orange-500" :
+            "border-l-red-600"
+          }`}>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-base">
+                <Shield className={`h-4 w-4 ${
+                  result.risk_level === "low" ? "text-emerald-600" :
+                  result.risk_level === "medium" ? "text-amber-600" :
+                  result.risk_level === "high" ? "text-orange-600" :
+                  "text-red-600"
+                }`} />
+                {t("riskAssessment")}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex flex-wrap gap-2">
+                <Badge className={`${
+                  result.risk_level === "low" ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300" :
+                  result.risk_level === "medium" ? "bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300" :
+                  result.risk_level === "high" ? "bg-orange-100 text-orange-800 dark:bg-orange-900/40 dark:text-orange-300" :
+                  "bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-300"
+                }`}>
+                  {result.risk_level === "low" ? <CheckCircle2 className="h-3 w-3 mr-1" /> :
+                   result.risk_level === "medium" ? <AlertCircle className="h-3 w-3 mr-1" /> :
+                   result.risk_level === "high" ? <AlertTriangle className="h-3 w-3 mr-1" /> :
+                   <AlertTriangle className="h-3 w-3 mr-1" />}
+                  {result.risk_level === "low" ? t("riskLow") :
+                   result.risk_level === "medium" ? t("riskMedium") :
+                   result.risk_level === "high" ? t("riskHigh") :
+                   t("riskCritical")}
+                </Badge>
+                <Badge className={`${
+                  result.recommendation === "proceed" ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300" :
+                  result.recommendation === "proceed_with_caution" ? "bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300" :
+                  "bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-300"
+                }`}>
+                  {result.recommendation === "proceed" ? <ThumbsUp className="h-3 w-3 mr-1" /> :
+                   result.recommendation === "proceed_with_caution" ? <AlertCircle className="h-3 w-3 mr-1" /> :
+                   <ThumbsDown className="h-3 w-3 mr-1" />}
+                  {result.recommendation === "proceed" ? t("proceed") :
+                   result.recommendation === "proceed_with_caution" ? t("proceedWithCaution") :
+                   t("notRecommended")}
+                </Badge>
+              </div>
+
+              <p className="text-sm text-muted-foreground">{result.risk_assessment}</p>
+
+              {result.success_factors?.length > 0 && (
+                <div>
+                  <p className="text-xs font-semibold text-emerald-700 dark:text-emerald-400 mb-2 flex items-center gap-1.5">
+                    <CheckCircle2 className="h-3 w-3" />
+                    {t("successFactors")}
+                  </p>
+                  <ul className="space-y-1">
+                    {result.success_factors.map((f, i) => (
+                      <li key={i} className="text-sm text-muted-foreground flex items-start gap-2">
+                        <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500 shrink-0 mt-0.5" />
+                        <span><span className="text-emerald-600 dark:text-emerald-400 font-medium">{t("factorItem")}:</span> {f}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {result.failure_factors?.length > 0 && (
+                <div>
+                  <p className="text-xs font-semibold text-red-700 dark:text-red-400 mb-2 flex items-center gap-1.5">
+                    <AlertTriangle className="h-3 w-3" />
+                    {t("failureFactors")}
+                  </p>
+                  <ul className="space-y-1">
+                    {result.failure_factors.map((f, i) => (
+                      <li key={i} className="text-sm text-muted-foreground flex items-start gap-2">
+                        <AlertTriangle className="h-3.5 w-3.5 text-red-500 shrink-0 mt-0.5" />
+                        <span><span className="text-red-600 dark:text-red-400 font-medium">{t("failureItem")}:</span> {f}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
             </CardContent>
           </Card>
 

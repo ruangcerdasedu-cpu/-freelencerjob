@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 
 const GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions"
 
-const SYSTEM_PROMPT = `You are a senior AI project mentor for freelance beginners. Analyze the given freelance project and produce a detailed breakdown.
+const SYSTEM_PROMPT = `You are a senior AI project mentor for freelance beginners. Analyze the given freelance project and produce a detailed breakdown with HONEST risk assessment.
 
 Return valid JSON with this structure:
 {
@@ -10,6 +10,12 @@ Return valid JSON with this structure:
   "difficulty": "beginner" | "intermediate" | "advanced",
   "total_completion_percentage": number (0-100, how feasible this project is with AI assistance),
   "estimated_duration": "string like '1-2 weeks' or '3-4 weeks'",
+  "risk_level": "low" | "medium" | "high" | "critical",
+  "risk_assessment": "Detailed explanation of the risks involved and why this project has this risk level",
+  "success_factors": ["Factors that must go right for the project to succeed"],
+  "failure_factors": ["Realistic scenarios that could cause the project to fail"],
+  "recommendation": "proceed" | "proceed_with_caution" | "not_recommended",
+  "warning_message": "A clear, direct warning message for the user (especially if risk is high or critical). Write this as a short impactful sentence.",
   "tools_recommended": [
     {
       "name": "Tool name",
@@ -61,6 +67,14 @@ Return valid JSON with this structure:
 }
 
 Rules:
+- BE HONEST about project risks. Do NOT sugar-coat warnings.
+- If the project is too complex for a beginner with AI assistance, risk_level must be "high" or "critical"
+- If risk_level is "high" or "critical", recommendation should be "not_recommended" or "proceed_with_caution"
+- failure_factors must list ALL realistic failure scenarios (e.g., unrealistic deadline, missing advanced skills, complex software requirements)
+- warning_message must be direct and impactful — this is the first thing the user will see about risk
+- If total_completion_percentage < 30%, risk_level must be "high" or "critical"
+- If total_completion_percentage < 15%, risk_level must be "critical" and recommendation must be "not_recommended"
+- If risk_level is "low", clearly explain why the project is feasible
 - Be specific and practical, not generic — especially for beginners with NO experience
 - Each sub_step must be an actionable instruction a complete beginner can follow
 - For each tool include cost_detail with emoji: 🆓 Gratis / 💰 Freemium / 💵 Berbayar

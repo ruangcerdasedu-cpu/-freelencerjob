@@ -270,7 +270,21 @@
     "assigneeAi": "AI",
     "assigneeHuman": "You",
     "assigneeBoth": "AI + You",
-    "chatAssistant": "Chat Assistant"
+    "chatAssistant": "Chat Assistant",
+    "riskAssessment": "Risk Assessment",
+    "riskLow": "Low Risk",
+    "riskMedium": "Medium Risk",
+    "riskHigh": "High Risk",
+    "riskCritical": "Critical Risk",
+    "successFactors": "Success Factors",
+    "failureFactors": "Potential Failure Risks",
+    "recommendation": "Recommendation",
+    "proceed": "Proceed",
+    "proceedWithCaution": "Proceed with Caution",
+    "notRecommended": "Not Recommended",
+    "riskDetail": "Risk Detail",
+    "factorItem": "This must go right",
+    "failureItem": "Risk factor"
   },
   "mentorChat": {
     "title": "AI Mentor Chat",

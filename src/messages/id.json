@@ -270,7 +270,21 @@
     "assigneeAi": "AI",
     "assigneeHuman": "Kamu",
     "assigneeBoth": "AI + Kamu",
-    "chatAssistant": "Asisten Chat"
+    "chatAssistant": "Asisten Chat",
+    "riskAssessment": "Analisis Risiko",
+    "riskLow": "Risiko Rendah",
+    "riskMedium": "Risiko Sedang",
+    "riskHigh": "Risiko Tinggi",
+    "riskCritical": "Risiko Kritis",
+    "successFactors": "Faktor Keberhasilan",
+    "failureFactors": "Potensi Risiko Kegagalan",
+    "recommendation": "Rekomendasi",
+    "proceed": "Lanjutkan",
+    "proceedWithCaution": "Lanjutkan dengan Hati-hati",
+    "notRecommended": "Tidak Disarankan",
+    "riskDetail": "Detail Risiko",
+    "factorItem": "Ini harus berhasil",
+    "failureItem": "Faktor risiko"
   },
   "mentorChat": {
     "title": "Chat Mentor AI",
