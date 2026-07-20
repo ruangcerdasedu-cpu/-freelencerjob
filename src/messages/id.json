@@ -300,7 +300,12 @@
     "projectDesc": "Deskripsi Proyek",
     "projectDescPlaceholder": "Deskripsikan proyek agar AI bisa membantu lebih baik...",
     "startChat": "Mulai Chat",
-    "changeProject": "Ganti Proyek"
+    "changeProject": "Ganti Proyek",
+    "saveChat": "Simpan Chat",
+    "saved": "Tersimpan",
+    "history": "Riwayat",
+    "savedChats": "Chat Tersimpan",
+    "noSavedChats": "Belum ada chat tersimpan"
   },
   "communicate": {
     "title": "Asisten Komunikasi",

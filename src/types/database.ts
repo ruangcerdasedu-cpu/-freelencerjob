@@ -93,6 +93,18 @@ export interface CommunicationDraft {
   created_at: string
 }
 
+export interface ChatHistory {
+  id: string
+  user_id: string
+  title: string
+  project_title: string | null
+  project_description: string | null
+  tasks: Json
+  messages: Json
+  created_at: string
+  updated_at: string
+}
+
 export interface Notification {
   id: string
   user_id: string

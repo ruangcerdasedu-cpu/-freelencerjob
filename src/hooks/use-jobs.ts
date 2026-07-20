@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/client"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
-import type { Job, UserJob } from "@/types/database"
+import type { Job, UserJob, ChatHistory } from "@/types/database"
 
 function getClient() {
   return createClient()
@@ -260,6 +260,73 @@ export function useTriggerScrape() {
       const response = await fetch("/api/scraper/trigger", { method: "POST" })
       if (!response.ok) throw new Error("Scrape trigger failed")
       return response.json()
+    },
+  })
+}
+
+export function useChatHistory() {
+  return useQuery({
+    queryKey: ["chat-history"],
+    queryFn: async () => {
+      const supabase = getClient()
+      const { data, error } = await supabase
+        .from("chat_history")
+        .select("id, title, project_title, created_at, updated_at")
+        .order("created_at", { ascending: false })
+        .limit(50)
+
+      if (error) throw error
+      return data as Pick<ChatHistory, "id" | "title" | "project_title" | "created_at" | "updated_at">[]
+    },
+  })
+}
+
+export function useSaveChatHistory() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async (data: {
+      title: string
+      project_title?: string
+      project_description?: string
+      tasks?: any[]
+      messages: { role: string; content: string }[]
+    }) => {
+      const response = await fetch("/api/chat-history", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      })
+
+      if (!response.ok) {
+        const err = await response.json()
+        throw new Error(err.error || "Failed to save chat history")
+      }
+
+      return response.json()
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["chat-history"] })
+    },
+  })
+}
+
+export function useDeleteChatHistory() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const response = await fetch(`/api/chat-history/${id}`, { method: "DELETE" })
+
+      if (!response.ok) {
+        const err = await response.json()
+        throw new Error(err.error || "Failed to delete chat history")
+      }
+
+      return response.json()
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["chat-history"] })
     },
   })
 }

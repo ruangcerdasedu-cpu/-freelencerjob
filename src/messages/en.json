@@ -300,7 +300,12 @@
     "projectDesc": "Project Description",
     "projectDescPlaceholder": "Describe your project so AI can help better...",
     "startChat": "Start Chat",
-    "changeProject": "Change Project"
+    "changeProject": "Change Project",
+    "saveChat": "Save Chat",
+    "saved": "Saved",
+    "history": "History",
+    "savedChats": "Saved Chats",
+    "noSavedChats": "No saved chats yet"
   },
   "communicate": {
     "title": "Communication Assistant",

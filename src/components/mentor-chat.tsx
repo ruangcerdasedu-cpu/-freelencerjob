@@ -4,7 +4,8 @@ import { useState, useRef, useEffect } from "react"
 import { useTranslations } from "next-intl"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { MessageCircle, Loader2, Send, X, Bot, Sparkles } from "lucide-react"
+import { MessageCircle, Loader2, Send, X, Bot, Sparkles, Save, History, Trash2, Check } from "lucide-react"
+import { useSaveChatHistory, useChatHistory, useDeleteChatHistory } from "@/hooks/use-jobs"
 
 interface ChatMessage {
   role: "user" | "assistant"
@@ -26,7 +27,13 @@ export function MentorChat({ open, onOpenChange, projectTitle, projectDescriptio
   ])
   const [input, setInput] = useState("")
   const [loading, setLoading] = useState(false)
+  const [showHistory, setShowHistory] = useState(false)
+  const [saved, setSaved] = useState(false)
   const scrollRef = useRef<HTMLDivElement>(null)
+
+  const { data: historyList } = useChatHistory()
+  const saveChat = useSaveChatHistory()
+  const deleteChat = useDeleteChatHistory()
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -58,11 +65,43 @@ export function MentorChat({ open, onOpenChange, projectTitle, projectDescriptio
       const data = await res.json()
       const answer = data.answer || t("error")
       setMessages((prev) => [...prev, { role: "assistant", content: answer }])
+      setSaved(false)
     } catch {
       setMessages((prev) => [...prev, { role: "assistant", content: t("error") }])
     } finally {
       setLoading(false)
     }
+  }
+
+  const handleSave = () => {
+    const title = projectTitle || "Untitled Chat"
+    saveChat.mutate(
+      {
+        title,
+        project_title: projectTitle,
+        project_description: projectDescription,
+        tasks,
+        messages: messages.map((m) => ({ role: m.role, content: m.content })),
+      },
+      { onSuccess: () => setSaved(true) },
+    )
+  }
+
+  const handleLoadHistory = (id: string) => {
+    fetch(`/api/chat-history/${id}`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.messages) {
+          setMessages(data.messages)
+          setSaved(true)
+          setShowHistory(false)
+        }
+      })
+      .catch(() => {})
+  }
+
+  const handleDeleteHistory = (id: string) => {
+    deleteChat.mutate(id)
   }
 
   return (
@@ -84,25 +123,79 @@ export function MentorChat({ open, onOpenChange, projectTitle, projectDescriptio
         <div className="fixed bottom-24 right-6 z-50 w-[360px] h-[480px] bg-white dark:bg-gray-900 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 flex flex-col overflow-hidden">
           {/* Header */}
           <div className="bg-emerald-600 px-4 py-3 flex items-center justify-between shrink-0">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-emerald-500 flex items-center justify-center">
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="w-10 h-10 rounded-full bg-emerald-500 flex items-center justify-center shrink-0">
                 <Bot className="h-5 w-5 text-white" />
               </div>
-              <div>
-                <h3 className="text-sm font-semibold text-white">AI Mentor Assistant</h3>
+              <div className="min-w-0">
+                <h3 className="text-sm font-semibold text-white truncate">AI Mentor Assistant</h3>
                 <div className="flex items-center gap-1.5">
                   <span className="w-2 h-2 rounded-full bg-green-300 animate-pulse"></span>
                   <span className="text-xs text-emerald-100">Online (AI Assistant)</span>
                 </div>
               </div>
             </div>
-            <button
-              onClick={() => onOpenChange(false)}
-              className="text-white/80 hover:text-white transition-colors"
-            >
-              <X className="h-5 w-5" />
-            </button>
+            <div className="flex items-center gap-1 shrink-0">
+              <button
+                onClick={handleSave}
+                disabled={saveChat.isPending}
+                className="text-white/80 hover:text-white transition-colors p-1"
+                title={t("saveChat")}
+              >
+                {saveChat.isPending ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : saved ? (
+                  <Check className="h-4 w-4" />
+                ) : (
+                  <Save className="h-4 w-4" />
+                )}
+              </button>
+              <button
+                onClick={() => setShowHistory(!showHistory)}
+                className="text-white/80 hover:text-white transition-colors p-1"
+                title={t("history")}
+              >
+                <History className="h-4 w-4" />
+              </button>
+              <button
+                onClick={() => onOpenChange(false)}
+                className="text-white/80 hover:text-white transition-colors p-1"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
           </div>
+
+          {/* History Panel */}
+          {showHistory && (
+            <div className="border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 max-h-[200px] overflow-y-auto shrink-0">
+              <div className="p-2 space-y-1">
+                <p className="text-xs font-semibold text-muted-foreground px-2 pt-1 pb-1">{t("savedChats")}</p>
+                {historyList?.length === 0 && (
+                  <p className="text-xs text-muted-foreground px-2 py-2">{t("noSavedChats")}</p>
+                )}
+                {historyList?.map((h) => (
+                  <div key={h.id} className="flex items-center gap-1 px-2 py-1.5 rounded-lg hover:bg-accent group cursor-pointer">
+                    <button
+                      onClick={() => handleLoadHistory(h.id)}
+                      className="flex-1 text-left text-xs truncate"
+                    >
+                      <span className="font-medium">{h.title}</span>
+                      <span className="text-muted-foreground ml-2">
+                        {new Date(h.created_at).toLocaleDateString()}
+                      </span>
+                    </button>
+                    <button
+                      onClick={() => handleDeleteHistory(h.id)}
+                      className="text-muted-foreground hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <Trash2 className="h-3 w-3" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Messages */}
           <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50 dark:bg-gray-800">
