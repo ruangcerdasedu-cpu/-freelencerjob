@@ -229,6 +229,31 @@ export function useManualJob() {
   })
 }
 
+export function usePricing() {
+  return useMutation({
+    mutationFn: async (data: {
+      jobTitle?: string
+      jobDescription: string
+      budgetMin?: number
+      budgetMax?: number
+      userSkills?: string[]
+      userRateMin?: number
+      userRateMax?: number
+    }) => {
+      const response = await fetch("/api/ai/pricing", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      })
+      if (!response.ok) {
+        const err = await response.json()
+        throw new Error(err.error || "Pricing analysis failed")
+      }
+      return response.json()
+    },
+  })
+}
+
 export function useTriggerScrape() {
   return useMutation({
     mutationFn: async () => {

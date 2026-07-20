@@ -13,7 +13,27 @@ interface RssItem {
 const FEEDS = [
   {
     name: "freelancer",
-    url: "https://www.freelancer.com/rss.xml?keyword=web+development+content+writing+data+entry",
+    url: "https://www.freelancer.com/rss.xml?keyword=web+development+react+nodejs+nextjs+typescript+python",
+  },
+  {
+    name: "freelancer",
+    url: "https://www.freelancer.com/rss.xml?keyword=data+entry+excel+virtual+assistant+admin",
+  },
+  {
+    name: "freelancer",
+    url: "https://www.freelancer.com/rss.xml?keyword=graphic+design+logo+photoshop+illustrator+figma+ui+ux",
+  },
+  {
+    name: "freelancer",
+    url: "https://www.freelancer.com/rss.xml?keyword=content+writing+copywriting+blog+seo+article",
+  },
+  {
+    name: "freelancer",
+    url: "https://www.freelancer.com/rss.xml?keyword=mobile+app+flutter+react+native+swift+kotlin+android",
+  },
+  {
+    name: "freelancer",
+    url: "https://www.freelancer.com/rss.xml?keyword=wordpress+laravel+php+shopify+woocommerce+ecommerce",
   },
 ]
 
@@ -24,7 +44,8 @@ const parser = new XMLParser({
 
 export async function GET() {
   const supabase = createServiceClient()
-  const results: { platform: string; synced: number; error?: string }[] = []
+  const results: { platform: string; synced: number; total: number; error?: string }[] = []
+  const seen = new Set<string>()
 
   for (const feed of FEEDS) {
     try {
@@ -34,7 +55,7 @@ export async function GET() {
       })
 
       if (!res.ok) {
-        results.push({ platform: feed.name, synced: 0, error: `HTTP ${res.status}` })
+        results.push({ platform: feed.name, synced: 0, total: 0, error: `HTTP ${res.status}` })
         continue
       }
 
@@ -50,6 +71,9 @@ export async function GET() {
         const link = item.link || ""
         const description = item.description || ""
         const externalId = link || title
+        if (seen.has(externalId)) continue
+        seen.add(externalId)
+
         const categories = item.category
         const skills = Array.isArray(categories) ? categories : categories ? [categories] : []
 
@@ -70,9 +94,9 @@ export async function GET() {
         if (!error) synced++
       }
 
-      results.push({ platform: feed.name, synced })
+      results.push({ platform: feed.name, synced, total: items.length })
     } catch (err) {
-      results.push({ platform: feed.name, synced: 0, error: String(err) })
+      results.push({ platform: feed.name, synced: 0, total: 0, error: String(err) })
     }
   }
 

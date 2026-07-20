@@ -11,6 +11,7 @@ import {
   Bookmark,
   Bot,
   MessageSquare,
+  TrendingUp,
   Settings,
   Menu,
   ChevronLeft,
@@ -30,6 +31,7 @@ function NavLinks({ className, onNavigate }: { className?: string; onNavigate?: 
     { href: "/saved", label: t("saved"), icon: Bookmark },
     { href: "/mentor", label: t("mentor"), icon: Bot },
     { href: "/communicate", label: t("communicate"), icon: MessageSquare },
+    { href: "/pricing", label: t("pricing"), icon: TrendingUp },
     { href: "/settings", label: t("settings"), icon: Settings },
   ]
 

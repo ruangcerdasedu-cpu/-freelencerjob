@@ -1,12 +1,14 @@
 "use client"
 
 import { useJobs, useUserJobs } from "@/hooks/use-jobs"
+import { useProfile } from "@/hooks/use-profile"
 import { useTranslations } from "next-intl"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { Progress } from "@/components/ui/progress"
 import { StatsCardSkeleton, ChartSkeleton } from "@/components/ui/skeleton"
-import { Briefcase, Eye, Clock, DollarSign, TrendingUp, TrendingDown, ArrowRight } from "lucide-react"
+import { Briefcase, Eye, Clock, DollarSign, TrendingUp, TrendingDown, ArrowRight, Brain, Target } from "lucide-react"
 import Link from "next/link"
 import { motion } from "framer-motion"
 import {
@@ -40,36 +42,65 @@ export default function DashboardPage() {
   const c = useTranslations("common")
   const { data: jobs, isLoading: jobsLoading } = useJobs()
   const { data: userJobs, isLoading: userJobsLoading } = useUserJobs()
+  const { data: profile } = useProfile()
 
   const isLoading = jobsLoading || userJobsLoading
+
+  const now = new Date()
+  const daysAgo = (d: number) => new Date(now.getTime() - d * 86400000)
+
+  const jobsThisWeek = jobs?.filter((j) => new Date(j.created_at) >= daysAgo(7)).length ?? 0
+  const jobsLastWeek = jobs?.filter((j) => {
+    const d = new Date(j.created_at)
+    return d >= daysAgo(14) && d < daysAgo(7)
+  }).length ?? 0
+  const jobsTrend = jobsLastWeek > 0 ? `+${Math.round(((jobsThisWeek - jobsLastWeek) / jobsLastWeek) * 100)}%` : jobsThisWeek > 0 ? "+100%" : "0"
+  const jobsTrendUp = jobsThisWeek >= jobsLastWeek
+
+  const userSkills = profile?.skills ?? []
+  const matchCount = jobs?.filter((j) => {
+    if (!userSkills.length || !j.skills_required?.length) return false
+    return j.skills_required.some((s: string) => userSkills.some((us: string) => us.toLowerCase().includes(s.toLowerCase()) || s.toLowerCase().includes(us.toLowerCase())))
+  }).length ?? 0
+  const matchPercent = jobs?.length ? Math.round((matchCount / jobs.length) * 100) : 0
+
+  const paidCount = userJobs?.filter((j) => j.status === "paid").length ?? 0
+  const appliedCount = userJobs?.filter((j) => j.status === "applied").length ?? 0
+  const appliedThisWeek = userJobs?.filter((j) => new Date(j.created_at) >= daysAgo(7)).length ?? 0
+  const appliedLastWeek = userJobs?.filter((j) => {
+    const d = new Date(j.created_at)
+    return d >= daysAgo(14) && d < daysAgo(7)
+  }).length ?? 0
+  const appliedTrend = appliedLastWeek > 0 ? `+${Math.round(((appliedThisWeek - appliedLastWeek) / appliedLastWeek) * 100)}%` : appliedThisWeek > 0 ? "+100%" : "0"
+  const appliedTrendUp = appliedThisWeek >= appliedLastWeek
 
   const stats = [
     {
       label: t("jobsAvailable"),
       value: jobs?.length ?? 0,
       icon: Briefcase,
-      trend: "+12",
+      trend: jobsTrend,
+      trendUp: jobsTrendUp,
+    },
+    {
+      label: t("matchCard"),
+      value: `${matchPercent}%`,
+      icon: Target,
+      trend: `${matchCount}`,
       trendUp: true,
     },
     {
       label: t("applied"),
-      value: userJobs?.filter((j) => j.status === "applied").length ?? 0,
+      value: appliedCount,
       icon: Eye,
-      trend: "+3",
-      trendUp: true,
-    },
-    {
-      label: t("inProgress"),
-      value: userJobs?.filter((j) => j.status === "in_progress").length ?? 0,
-      icon: Clock,
-      trend: "0",
-      trendUp: true,
+      trend: appliedTrend,
+      trendUp: appliedTrendUp,
     },
     {
       label: t("earned"),
-      value: `$${(userJobs?.filter((j) => j.status === "paid").length ?? 0) * 100}`,
+      value: `$${paidCount * 100}`,
       icon: DollarSign,
-      trend: "+$200",
+      trend: `$${paidCount * 100}`,
       trendUp: true,
     },
   ]
@@ -83,15 +114,19 @@ export default function DashboardPage() {
     { name: "Paid", value: userJobs?.filter((j) => j.status === "paid").length ?? 0, color: funnelColors.paid },
   ]
 
-  const weeklyData = [
-    { day: "Mon", jobs: 4, applied: 1 },
-    { day: "Tue", jobs: 7, applied: 2 },
-    { day: "Wed", jobs: 5, applied: 0 },
-    { day: "Thu", jobs: 8, applied: 3 },
-    { day: "Fri", jobs: 6, applied: 1 },
-    { day: "Sat", jobs: 3, applied: 0 },
-    { day: "Sun", jobs: 2, applied: 0 },
-  ]
+  const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
+  const weeklyData = dayNames.map((day) => {
+    const dayIndex = dayNames.indexOf(day)
+    const jobsOnDay = jobs?.filter((j) => {
+      const d = new Date(j.created_at)
+      return d >= daysAgo((6 - dayIndex) + 7) && d < daysAgo(6 - dayIndex)
+    }).length ?? 0
+    const appliedOnDay = userJobs?.filter((j) => {
+      const d = new Date(j.created_at)
+      return d >= daysAgo((6 - dayIndex) + 7) && d < daysAgo(6 - dayIndex)
+    }).length ?? 0
+    return { day, jobs: jobsOnDay, applied: appliedOnDay }
+  })
 
   const recentJobs = jobs?.slice(0, 5) ?? []
 
@@ -152,6 +187,40 @@ export default function DashboardPage() {
               </Card>
             </motion.div>
           ))}
+        </motion.div>
+      )}
+
+      {userSkills.length > 0 && (
+        <motion.div variants={container} initial="hidden" animate="show">
+          <Card className="border-primary/10">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base flex items-center gap-2">
+                <Brain className="h-4 w-4 text-primary" />
+                {t("skillMatchTitle")}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-sm text-muted-foreground">{t("skillMatchDesc", { count: matchCount, total: jobs?.length ?? 0 })}</span>
+                <span className="text-lg font-bold">{matchPercent}%</span>
+              </div>
+              <Progress value={matchPercent} className="h-2" />
+              <div className="flex flex-wrap gap-1.5 mt-3">
+                {userSkills.slice(0, 6).map((skill: string) => {
+                  const hasMatch = jobs?.some((j) =>
+                    j.skills_required?.some((s: string) =>
+                      s.toLowerCase().includes(skill.toLowerCase()) || skill.toLowerCase().includes(s.toLowerCase())
+                    )
+                  )
+                  return (
+                    <Badge key={skill} variant={hasMatch ? "success" : "secondary"} className="text-xs">
+                      {skill}
+                    </Badge>
+                  )
+                })}
+              </div>
+            </CardContent>
+          </Card>
         </motion.div>
       )}
 
