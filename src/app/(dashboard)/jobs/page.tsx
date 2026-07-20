@@ -19,7 +19,7 @@ import { Label } from "@/components/ui/label"
 import {
   Search, Brain, Bookmark, RefreshCw,
   DollarSign, Clock, LayoutGrid, List, Filter,
-  ArrowUpDown, Plus, Rss, ExternalLink, Globe, MapPin
+  ArrowUpDown, Plus, Rss, ExternalLink, Globe, MapPin, ShoppingBag
 } from "lucide-react"
 import Link from "next/link"
 import { toast } from "sonner"
@@ -201,6 +201,24 @@ export default function JobsPage() {
             <Rss className={`mr-2 h-4 w-4 ${rssScrape.isPending ? "animate-spin" : ""}`} />
             {rssScrape.isPending ? t("fetching") : t("rssFeed")}
           </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={async () => {
+              toast.loading(t("scraping"))
+              const res = await fetch("/api/scraper/fastwork")
+              toast.dismiss()
+              const data = await res.json()
+              if (data.success) {
+                toast.success(t("fastworkToast", { count: data.synced }))
+              } else {
+                toast.error(t("fastworkError"))
+              }
+            }}
+          >
+            <ShoppingBag className="mr-2 h-4 w-4" />
+            {t("fastworkFeed")}
+          </Button>
         </div>
       </motion.div>
 
@@ -266,6 +284,7 @@ export default function JobsPage() {
               <option value="upwork">Upwork</option>
               <option value="freelancer">Freelancer</option>
               <option value="fiverr">Fiverr</option>
+              <option value="fastwork">Fastwork</option>
             </select>
           </div>
           <div className="space-y-1">

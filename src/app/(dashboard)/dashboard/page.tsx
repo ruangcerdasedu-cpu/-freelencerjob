@@ -134,6 +134,7 @@ export default function DashboardPage() {
     { name: "Upwork", value: jobs?.filter((j) => j.platform === "upwork").length ?? 0, color: "#14a800" },
     { name: "Freelancer", value: jobs?.filter((j) => j.platform === "freelancer").length ?? 0, color: "#0078d4" },
     { name: "Fiverr", value: jobs?.filter((j) => j.platform === "fiverr").length ?? 0, color: "#1dbf73" },
+    { name: "Fastwork", value: jobs?.filter((j) => j.platform === "fastwork").length ?? 0, color: "#e91e63" },
   ]
 
   return (

@@ -34,7 +34,7 @@ export interface UserApiKey {
 export interface Job {
   id: string
   external_id: string
-  platform: "upwork" | "freelancer" | "fiverr"
+  platform: "upwork" | "freelancer" | "fiverr" | "fastwork"
   locale: "LN" | "DN"
   title: string
   description: string

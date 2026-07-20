@@ -197,7 +197,10 @@
     "localeLn": "International (LN)",
     "localeDn": "Indonesia (DN)",
     "localeLabel": "Location",
-    "openOriginal": "Open original job posting"
+    "openOriginal": "Open original job posting",
+    "fastworkFeed": "Fastwork",
+    "fastworkToast": "Fastwork: {count} services synced",
+    "fastworkError": "Fastwork sync failed"
   },
   "jobDetail": {
     "notFound": "Job not found",

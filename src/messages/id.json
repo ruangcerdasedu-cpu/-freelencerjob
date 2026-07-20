@@ -197,7 +197,10 @@
     "localeLn": "Luar Negeri (LN)",
     "localeDn": "Dalam Negeri (DN)",
     "localeLabel": "Lokasi",
-    "openOriginal": "Buka lowongan asli"
+    "openOriginal": "Buka lowongan asli",
+    "fastworkFeed": "Fastwork",
+    "fastworkToast": "Fastwork: {count} layanan disinkron",
+    "fastworkError": "Sinkron Fastwork gagal"
   },
   "jobDetail": {
     "notFound": "Pekerjaan tidak ditemukan",
