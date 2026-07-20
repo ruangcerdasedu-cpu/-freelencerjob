@@ -1,17 +1,19 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { useTranslations } from "next-intl"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { Separator } from "@/components/ui/separator"
 import { Badge } from "@/components/ui/badge"
+import { Switch } from "@/components/ui/switch"
 import { toast } from "sonner"
 import { useUser } from "@/hooks/use-user"
 import { useProfile, useUpdateProfile } from "@/hooks/use-profile"
+import { ExternalLink, Loader2 } from "lucide-react"
+import Link from "next/link"
 
 const SKILL_SUGGESTIONS = [
   "React", "Next.js", "TypeScript", "JavaScript", "Node.js", "Python", "PHP", "Laravel",
@@ -20,6 +22,14 @@ const SKILL_SUGGESTIONS = [
   "SEO", "Content Writing", "Copywriting", "Digital Marketing", "Social Media",
   "Data Entry", "Excel", "Web Scraping", "Mobile Development", "Flutter", "React Native",
 ]
+
+function slugify(text: string) {
+  return text
+    .toLowerCase()
+    .replace(/[^\w\s-]/g, "")
+    .replace(/[\s_]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+}
 
 export default function SettingsPage() {
   const t = useTranslations("settings")
@@ -32,7 +42,9 @@ export default function SettingsPage() {
   const [skillInput, setSkillInput] = useState("")
   const [hourlyRateMin, setHourlyRateMin] = useState("")
   const [hourlyRateMax, setHourlyRateMax] = useState("")
-  const [experience, setExperience] = useState("")
+  const [portfolioEnabled, setPortfolioEnabled] = useState(false)
+  const [portfolioSlug, setPortfolioSlug] = useState("")
+  const [slugManuallyEdited, setSlugManuallyEdited] = useState(false)
 
   useEffect(() => {
     if (profile) {
@@ -40,8 +52,16 @@ export default function SettingsPage() {
       setSkills(profile.skills || [])
       setHourlyRateMin(profile.hourly_rate_min?.toString() || "")
       setHourlyRateMax(profile.hourly_rate_max?.toString() || "")
+      setPortfolioEnabled(profile.portfolio_enabled || false)
+      setPortfolioSlug(profile.portfolio_slug || "")
     }
   }, [profile])
+
+  useEffect(() => {
+    if (!slugManuallyEdited && fullName && !profile?.portfolio_slug) {
+      setPortfolioSlug(slugify(fullName))
+    }
+  }, [fullName, slugManuallyEdited, profile])
 
   const addSkill = (skill: string) => {
     const s = skill.trim()
@@ -65,8 +85,15 @@ export default function SettingsPage() {
       skills,
       hourly_rate_min: hourlyRateMin ? parseInt(hourlyRateMin) : null,
       hourly_rate_max: hourlyRateMax ? parseInt(hourlyRateMax) : null,
+      portfolio_enabled: portfolioEnabled,
+      portfolio_slug: portfolioSlug || null,
     })
-    toast.success(t("savedToast"))
+
+    if (portfolioEnabled && portfolioSlug) {
+      toast.success(`${t("portfolioEnabledToast")} /portfolio/${portfolioSlug}`)
+    } else {
+      toast.success(t("savedToast"))
+    }
   }
 
   if (isLoading) {
@@ -146,8 +173,62 @@ export default function SettingsPage() {
             </div>
           </div>
           <Button onClick={handleSave} disabled={updateProfile.isPending}>
-            {updateProfile.isPending ? t("saving") : t("saveProfile")}
+            {updateProfile.isPending ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> {t("saving")}</> : t("saveProfile")}
           </Button>
+        </CardContent>
+      </Card>
+
+      <Separator />
+
+      <Card>
+        <CardHeader>
+          <CardTitle>{t("portfolio")}</CardTitle>
+          <CardDescription>{t("portfolioDesc")}</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex items-center justify-between rounded-lg border p-3">
+            <div>
+              <p className="text-sm font-medium">{t("enablePortfolio")}</p>
+            </div>
+            <Switch checked={portfolioEnabled} onCheckedChange={setPortfolioEnabled} />
+          </div>
+
+          <div className="space-y-2">
+            <Label>{t("portfolioSlug")}</Label>
+            <Input
+              value={portfolioSlug}
+              onChange={(e) => { setPortfolioSlug(slugify(e.target.value)); setSlugManuallyEdited(true) }}
+              placeholder={t("portfolioSlugPlaceholder")}
+            />
+          </div>
+
+          {portfolioSlug && (
+            <div className="rounded-lg bg-muted/50 p-3">
+              <p className="text-xs text-muted-foreground mb-1">{t("portfolioUrl")}</p>
+              <Link
+                href={`/portfolio/${portfolioSlug}`}
+                target="_blank"
+                className="flex items-center gap-1 text-sm font-medium text-primary hover:underline"
+              >
+                /portfolio/{portfolioSlug}
+                <ExternalLink className="h-3 w-3" />
+              </Link>
+            </div>
+          )}
+
+          <div className="flex gap-2">
+            <Button onClick={handleSave} disabled={updateProfile.isPending}>
+              {updateProfile.isPending ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> {t("saving")}</> : t("saveProfile")}
+            </Button>
+            {portfolioEnabled && portfolioSlug && (
+              <Button variant="outline" asChild>
+                <Link href={`/portfolio/${portfolioSlug}`} target="_blank">
+                  <ExternalLink className="mr-2 h-4 w-4" />
+                  {t("viewPortfolio")}
+                </Link>
+              </Button>
+            )}
+          </div>
         </CardContent>
       </Card>
 

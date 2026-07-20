@@ -118,6 +118,7 @@
   "userMenu": {
     "settings": "Pengaturan",
     "toggleTheme": "Ganti tema",
+    "portfolio": "Portofolio Saya",
     "signOut": "Keluar"
   },
   "dashboard": {
@@ -347,6 +348,14 @@
     "apifyToken": "Token API Apify",
     "apifyPlaceholder": "apify_...",
     "saveToken": "Simpan Token",
-    "savedToast": "Pengaturan disimpan!"
+    "savedToast": "Pengaturan disimpan!",
+    "portfolio": "Portofolio",
+    "portfolioDesc": "Tampilkan proyek selesai Anda ke klien potensial.",
+    "enablePortfolio": "Aktifkan portofolio publik",
+    "portfolioSlug": "Slug URL portofolio",
+    "portfolioSlugPlaceholder": "nama-anda",
+    "portfolioUrl": "URL portofolio Anda:",
+    "viewPortfolio": "Lihat Portofolio",
+    "portfolioEnabledToast": "Portofolio sekarang aktif di"
   }
 }

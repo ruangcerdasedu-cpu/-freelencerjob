@@ -14,13 +14,15 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { useUser } from "@/hooks/use-user"
-import { LogOut, Moon, Sun, User } from "lucide-react"
+import { useProfile } from "@/hooks/use-profile"
+import { ExternalLink, LogOut, Moon, Sun, User } from "lucide-react"
 import { useTheme } from "next-themes"
 import Link from "next/link"
 
 export function UserMenu() {
   const t = useTranslations("userMenu")
   const { user } = useUser()
+  const { data: profile } = useProfile()
   const router = useRouter()
   const { theme, setTheme } = useTheme()
 
@@ -57,6 +59,14 @@ export function UserMenu() {
             {t("settings")}
           </Link>
         </DropdownMenuItem>
+        {profile?.portfolio_enabled && profile?.portfolio_slug && (
+          <DropdownMenuItem asChild>
+            <Link href={`/portfolio/${profile.portfolio_slug}`} target="_blank">
+              <ExternalLink className="mr-2 h-4 w-4" />
+              {t("portfolio")}
+            </Link>
+          </DropdownMenuItem>
+        )}
         <DropdownMenuItem onClick={() => setTheme(theme === "dark" ? "light" : "dark")}>
           {theme === "dark" ? <Sun className="mr-2 h-4 w-4" /> : <Moon className="mr-2 h-4 w-4" />}
           {t("toggleTheme")}

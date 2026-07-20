@@ -118,6 +118,7 @@
   "userMenu": {
     "settings": "Settings",
     "toggleTheme": "Toggle theme",
+    "portfolio": "My Portfolio",
     "signOut": "Sign out"
   },
   "dashboard": {
@@ -347,6 +348,14 @@
     "apifyToken": "Apify API Token",
     "apifyPlaceholder": "apify_...",
     "saveToken": "Save Token",
-    "savedToast": "Settings saved!"
+    "savedToast": "Settings saved!",
+    "portfolio": "Portfolio",
+    "portfolioDesc": "Showcase your completed projects to potential clients.",
+    "enablePortfolio": "Enable public portfolio",
+    "portfolioSlug": "Portfolio URL slug",
+    "portfolioSlugPlaceholder": "your-name",
+    "portfolioUrl": "Your portfolio URL:",
+    "viewPortfolio": "View Portfolio",
+    "portfolioEnabledToast": "Portfolio is now live at"
   }
 }

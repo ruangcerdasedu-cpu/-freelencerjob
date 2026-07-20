@@ -16,6 +16,8 @@ export interface Profile {
   hourly_rate_min: number | null
   hourly_rate_max: number | null
   timezone: string
+  portfolio_enabled: boolean
+  portfolio_slug: string | null
   created_at: string
   updated_at: string
 }
