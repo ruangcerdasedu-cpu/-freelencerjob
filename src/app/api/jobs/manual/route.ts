@@ -4,7 +4,7 @@ import { createServiceClient } from "@/lib/supabase/client"
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { title, description, url, budget_min, budget_max, currency, skills, client_country } = body
+    const { title, description, url, budget_min, budget_max, currency, skills, client_country, locale } = body
 
     if (!title || !description) {
       return NextResponse.json({ error: "title and description are required" }, { status: 400 })
@@ -17,7 +17,8 @@ export async function POST(request: NextRequest) {
       .from("jobs")
       .insert({
         external_id: externalId,
-        platform: "upwork",
+        platform: "freelancer",
+        locale: locale || "LN",
         title,
         description,
         url: url || "",

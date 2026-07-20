@@ -19,7 +19,7 @@ import { Label } from "@/components/ui/label"
 import {
   Search, Brain, Bookmark, RefreshCw,
   DollarSign, Clock, LayoutGrid, List, Filter,
-  ArrowUpDown, Plus, Rss
+  ArrowUpDown, Plus, Rss, ExternalLink, Globe, MapPin
 } from "lucide-react"
 import Link from "next/link"
 import { toast } from "sonner"
@@ -43,10 +43,10 @@ export default function JobsPage() {
   const [search, setSearch] = useState("")
   const [view, setView] = useState<"list" | "grid">("list")
   const [showFilters, setShowFilters] = useState(false)
-  const [filter, setFilter] = useState<{ platform?: string; risk?: string; source?: string }>({})
+  const [filter, setFilter] = useState<{ platform?: string; risk?: string; source?: string; locale?: string }>({})
   const [dialogOpen, setDialogOpen] = useState(false)
-  const [form, setForm] = useState({ title: "", description: "", url: "", budget_min: "", budget_max: "", currency: "USD", skills: "", client_country: "" })
-  const { data: jobs, isLoading, error } = useJobs({ search: search || undefined, platform: filter.platform, riskLevel: filter.risk, source: filter.source })
+  const [form, setForm] = useState({ title: "", description: "", url: "", budget_min: "", budget_max: "", currency: "USD", skills: "", client_country: "", locale: "LN" })
+  const { data: jobs, isLoading, error } = useJobs({ search: search || undefined, platform: filter.platform, riskLevel: filter.risk, source: filter.source, locale: filter.locale })
   const saveJob = useSaveJob()
   const analyzeJob = useAnalyzeJob()
   const triggerScrape = useTriggerScrape()
@@ -91,10 +91,11 @@ export default function JobsPage() {
       currency: form.currency,
       skills: form.skills || undefined,
       client_country: form.client_country || undefined,
+      locale: form.locale,
     })
     toast.success(t("addSuccess"))
     setDialogOpen(false)
-    setForm({ title: "", description: "", url: "", budget_min: "", budget_max: "", currency: "USD", skills: "", client_country: "" })
+    setForm({ title: "", description: "", url: "", budget_min: "", budget_max: "", currency: "USD", skills: "", client_country: "", locale: "LN" })
   }
 
   const scoreColor = (score: number | null) => {
@@ -166,6 +167,17 @@ export default function JobsPage() {
                       <option value="EUR">EUR</option>
                     </select>
                   </div>
+                </div>
+                <div className="space-y-2">
+                  <Label>{t("localeLabel")}</Label>
+                  <select
+                    className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
+                    value={form.locale}
+                    onChange={(e) => setForm({ ...form, locale: e.target.value })}
+                  >
+                    <option value="LN">{t("localeLn")}</option>
+                    <option value="DN">{t("localeDn")}</option>
+                  </select>
                 </div>
                 <div className="space-y-2">
                   <Label>{t("skillsLabel")}</Label>
@@ -254,6 +266,18 @@ export default function JobsPage() {
               <option value="upwork">Upwork</option>
               <option value="freelancer">Freelancer</option>
               <option value="fiverr">Fiverr</option>
+            </select>
+          </div>
+          <div className="space-y-1">
+            <label className="text-xs font-medium text-muted-foreground">{t("locale")}</label>
+            <select
+              className="h-9 rounded-md border border-input bg-background px-3 text-sm"
+              value={filter.locale || ""}
+              onChange={(e) => setFilter({ ...filter, locale: e.target.value || undefined })}
+            >
+              <option value="">{t("allLocales")}</option>
+              <option value="LN">{t("localeLn")}</option>
+              <option value="DN">{t("localeDn")}</option>
             </select>
           </div>
           <div className="space-y-1">
@@ -365,6 +389,12 @@ export default function JobsPage() {
                           <Badge variant="secondary" className="text-xs font-normal">
                             {job.external_id?.startsWith?.("manual_") ? "Manual" : job.platform}
                           </Badge>
+                          <Badge variant="outline" className={`text-xs font-normal ${
+                            job.locale === "DN" ? "border-emerald-300 text-emerald-700 dark:text-emerald-400 dark:border-emerald-700" : "border-blue-300 text-blue-700 dark:text-blue-400 dark:border-blue-700"
+                          }`}>
+                            {job.locale === "DN" ? <MapPin className="h-3 w-3 mr-0.5" /> : <Globe className="h-3 w-3 mr-0.5" />}
+                            {job.locale === "DN" ? "DN" : "LN"}
+                          </Badge>
                           {job.budget_min && (
                             <span className="text-xs text-muted-foreground flex items-center gap-0.5">
                               <DollarSign className="h-3 w-3" />
@@ -428,6 +458,18 @@ export default function JobsPage() {
                           </Button>
                         )}
                         <div className="flex gap-1">
+                          {job.url && (
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-7 w-7"
+                              asChild
+                            >
+                              <a href={job.url} target="_blank" rel="noopener noreferrer" title={t("openOriginal")}>
+                                <ExternalLink className="h-3.5 w-3.5" />
+                              </a>
+                            </Button>
+                          )}
                           <Button
                             variant="ghost"
                             size="icon"

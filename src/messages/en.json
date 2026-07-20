@@ -191,7 +191,13 @@
     "addError": "Failed to add job",
     "rssFeed": "RSS Feed",
     "fetching": "Fetching...",
-    "rssToast": "RSS feed fetched!"
+    "rssToast": "RSS feed fetched!",
+    "locale": "Locale",
+    "allLocales": "All Locations",
+    "localeLn": "International (LN)",
+    "localeDn": "Indonesia (DN)",
+    "localeLabel": "Location",
+    "openOriginal": "Open original job posting"
   },
   "jobDetail": {
     "notFound": "Job not found",

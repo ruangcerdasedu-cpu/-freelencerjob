@@ -12,6 +12,7 @@ export function useJobs(filters?: {
   minScore?: number
   search?: string
   source?: string
+  locale?: string
 }) {
   return useQuery({
     queryKey: ["jobs", filters],
@@ -37,6 +38,9 @@ export function useJobs(filters?: {
       }
       if (filters?.source === "manual") {
         query = query.ilike("external_id", "manual_%")
+      }
+      if (filters?.locale) {
+        query = query.eq("locale", filters.locale)
       }
 
       const { data, error } = await query
@@ -211,6 +215,7 @@ export function useManualJob() {
       currency?: string
       skills?: string
       client_country?: string
+      locale?: string
     }) => {
       const response = await fetch("/api/jobs/manual", {
         method: "POST",

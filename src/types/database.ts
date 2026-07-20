@@ -35,6 +35,7 @@ export interface Job {
   id: string
   external_id: string
   platform: "upwork" | "freelancer" | "fiverr"
+  locale: "LN" | "DN"
   title: string
   description: string
   budget_min: number | null

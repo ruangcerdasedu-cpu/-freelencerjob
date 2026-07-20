@@ -191,7 +191,13 @@
     "addError": "Gagal menambahkan pekerjaan",
     "rssFeed": "RSS Feed",
     "fetching": "Memuat...",
-    "rssToast": "RSS feed berhasil diambil!"
+    "rssToast": "RSS feed berhasil diambil!",
+    "locale": "Lokasi",
+    "allLocales": "Semua Lokasi",
+    "localeLn": "Luar Negeri (LN)",
+    "localeDn": "Dalam Negeri (DN)",
+    "localeLabel": "Lokasi",
+    "openOriginal": "Buka lowongan asli"
   },
   "jobDetail": {
     "notFound": "Pekerjaan tidak ditemukan",

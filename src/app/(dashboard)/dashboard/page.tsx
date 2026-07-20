@@ -418,6 +418,14 @@ export default function DashboardPage() {
                       <span className="truncate font-medium">{job.title}</span>
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
+                      <Badge
+                        variant="outline"
+                        className={`text-xs ${
+                          job.locale === "DN" ? "border-emerald-300 text-emerald-700 dark:text-emerald-400 dark:border-emerald-700" : "border-blue-300 text-blue-700 dark:text-blue-400 dark:border-blue-700"
+                        }`}
+                      >
+                        {job.locale === "DN" ? "DN" : "LN"}
+                      </Badge>
                       <Badge variant="secondary" className="text-xs">
                         {job.platform}
                       </Badge>
